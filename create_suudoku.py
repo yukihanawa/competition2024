@@ -2,17 +2,16 @@ import numpy as np
 import random
 import math
 
-answer = np.zeros((9, 9), dtype=int)
 
-
-def create_first_answer(answer):
+def create_first_answer():
+    answer = np.zeros((9, 9), dtype=int)
     for i in range(9):
         for j in range(9):
             a = i + j +1
             if(a <= 9):
                 answer[i][j] = i + j + 1
             else:
-                answer[i][j] = a%9
+                answer[i][j] = a % 9
     #２列目と4列目を入れ替える
     answer[:,1], answer[:,3] = answer[:,3].copy(), answer[:,1].copy()
     #３列目と7列目を入れ替える
@@ -63,9 +62,21 @@ def change_column(answer):
     return answer
 
 
-answer = create_first_answer(answer)
-answer = change_row_block(answer)
-answer = change_column_block(answer)
-answer = change_row(answer)
-answer = change_column(answer)
-print(answer)
+# answer = create_first_answer(answer)
+# answer = change_row_block(answer)
+# answer = change_column_block(answer)
+# answer = change_row(answer)
+# answer = change_column(answer)
+# print(answer)
+
+def create_answer():
+    answer = create_first_answer()
+    if random.random() < 0.5:
+        answer = change_row_block(answer)
+    if random.random() < 0.5:
+        answer = change_column_block(answer)
+    if random.random() < 0.5:
+        answer = change_row(answer)
+    if random.random() < 0.5:
+        answer = change_column(answer)
+    return answer.flatten()
