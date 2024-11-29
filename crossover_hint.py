@@ -29,6 +29,26 @@ def solve_sudoku(board, solutions):
                 return  # 他の可能性を試すために戻る
     solutions.append(board.copy())
 
+def fill_child(child, parent1, parent2, i):
+    """
+    指定された子 (child) の必要な位置を親 (parent1, parent2) から埋める関数
+    """
+    if random.choice([True, False]):
+        primary, secondary = parent1, parent2
+    else:
+        primary, secondary = parent2, parent1
+
+    if primary[i] not in child:
+        child[i] = primary[i]
+        for j in range(i + 1, 81):
+            if primary[j] == primary[i] and child[j] == 0:
+                child[j] = primary[j]
+    elif secondary[i] not in child:
+        child[i] = secondary[i]
+        for j in range(i + 1, 81):
+            if secondary[j] == secondary[i] and child[j] == 0:
+                child[j] = secondary[j]
+
 
 def crossover(parent1, parent2, parent1_eval, parent2_eval):
     """親1と親2から位置が被らない数値ペアを選び、子供を生成します。"""
@@ -38,79 +58,41 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
     parent1 = np.array(parent1) * HINT_PATTERN
     parent2 = np.array(parent2) * HINT_PATTERN
 
-    for i in range(81):
-        # child1の必要な位置に数字がない
-        if HINT_PATTERN[i] == 1 and child1[i] == 0:
-            if random.choice([True, False]):
-                #child1にparent1から数字を入れる
-                if parent1[i] not in child1:
-                    #parent1[i]がchild1に入っていない場合
-                    child1[i] = parent1[i]
-                    for j in range(i + 1, 81, 1):
-                        if parent1[j] == parent1[i] and child1[j] == 0:
-                            child1[j] = parent1[j]
-                elif parent2[i] not in child1:
-                    print("in child parent1[i]:", parent1[i])
-                    #child1にparent2から数字を入れる
-                    child1[i] = parent2[i]
-                    for j in range(i + 1, 81, 1):
-                        if parent2[j] == parent2[i] and child1[j] == 0:
-                            child1[j] = parent2[j]
-            else:
-                #child1にparent2から数字を入れる
-                if parent2[i] not in child1:
-                    child1[i] = parent2[i]
-                    for j in range(i + 1, 81, 1):
-                        if parent2[j] == parent2[i] and child1[j] == 0:
-                            child1[j] = parent2[j]
-                elif parent1[i] not in child1:
-                    child1[i] = parent1[i]
-                    for j in range(i + 1, 81, 1):
-                        if parent1[j] == parent1[i] and child1[j] == 0:
-                            child1[j] = parent1[j]
-        # child2の必要な位置に数字がない
-        if HINT_PATTERN[i] == 1 and child2[i] == 0:
-            if random.choice([True, False]):
-                if parent1[i] not in child2:
-                    child2[i] = parent1[i]
-                    for j in range(i + 1, 81, 1):
-                        if parent1[j] == parent1[i] and child2[j] == 0:
-                            child2[j] = parent1[j]
-                elif parent2[i] not in child2:
-                    child2[i] = parent2[i]
-                    for j in range(i + 1, 81, 1):
-                        if parent2[j] == parent2[i] and child2[j] == 0:
-                            child2[j] = parent2[j]
-            else:
-                if parent2[i] not in child2:
-                    child2[i] = parent2[i]
-                    for j in range(i + 1, 81, 1):
-                        if parent2[j] == parent2[i] and child2[j] == 0:
-                            child2[j] = parent2[j]
-                elif parent1[i] not in child2:
-                    child2[i] = parent1[i]
-                    for j in range(i + 1, 81, 1):
-                        if parent1[j] == parent1[i] and child2[j] == 0:
-                            child2[j] = parent1[j]
-    
-    print("child1:")
-    print(child1.reshape(9, 9))
+    print("parent1:")
+    print(parent1.reshape(9, 9))
+    print() 
+    print("parent2:")
+    print(parent2.reshape(9, 9))
     print()
-    print("child2:")
-    print(child2.reshape(9, 9))
+
+    for i in range(81):
+        # child1の処理
+        if HINT_PATTERN[i] == 1 and child1[i] == 0:
+            fill_child(child1, parent1, parent2, i)
+        # child2の処理
+        if HINT_PATTERN[i] == 1 and child2[i] == 0:
+            fill_child(child2, parent1, parent2, i)
+
+    # print("child1:")
+    # print(child1.reshape(9, 9))
+    # print()
+    # print("child2:")
+    # print(child2.reshape(9, 9))
     
     #HINTが埋められなかった場所が発生する可能性があり、その場合にはナンプレを解いて埋める
+    check_child1 = True
+    check_child2 = True
     for i in range(81):
         if HINT_PATTERN[i] == 1 and child1[i] == 0:
             check_child1 = False
-            print("i:", i)
-            print()
+            # print("i:", i)
+            # print()
 
     for i in range(81):
         if HINT_PATTERN[i] == 1 and child2[i] == 0:
             check_child2 = False
-            print("i:", i)
-            print()
+            # print("i:", i)
+            # print()
 
     if check_child1 == False:
         child1 = solve_suudoku_2d.solve_suudoku_one(np.array(child1).reshape(9, 9))
@@ -188,10 +170,67 @@ parent1, parent2, parent1_eval, parent2_eval = crossover(parent1, parent2, paren
 
 
 
-print("親1の評価値:", parent1_eval)
-print("親1の解:")
-print(np.array(parent1).reshape(9, 9))
-print()
-print("親2の評価値:", parent2_eval)
-print("親2の解:")
-print(np.array(parent2).reshape(9, 9))
+# print("親1の評価値:", parent1_eval)
+# print("親1の解:")
+# print(np.array(parent1).reshape(9, 9))
+# print()
+# print("親2の評価値:", parent2_eval)
+# print("親2の解:")
+# print(np.array(parent2).reshape(9, 9))
+
+
+#保存用
+    # for i in range(81):
+    #     # child1の必要な位置に数字がない
+    #     if HINT_PATTERN[i] == 1 and child1[i] == 0:
+    #         if random.choice([True, False]):
+    #             #child1にparent1から数字を入れる
+    #             if parent1[i] not in child1:
+    #                 #parent1[i]がchild1に入っていない場合
+    #                 child1[i] = parent1[i]
+    #                 for j in range(i + 1, 81, 1):
+    #                     if parent1[j] == parent1[i] and child1[j] == 0:
+    #                         child1[j] = parent1[j]
+    #             elif parent2[i] not in child1:
+    #                 print("in child parent1[i]:", parent1[i])
+    #                 #child1にparent2から数字を入れる
+    #                 child1[i] = parent2[i]
+    #                 for j in range(i + 1, 81, 1):
+    #                     if parent2[j] == parent2[i] and child1[j] == 0:
+    #                         child1[j] = parent2[j]
+    #         else:
+    #             #child1にparent2から数字を入れる
+    #             if parent2[i] not in child1:
+    #                 child1[i] = parent2[i]
+    #                 for j in range(i + 1, 81, 1):
+    #                     if parent2[j] == parent2[i] and child1[j] == 0:
+    #                         child1[j] = parent2[j]
+    #             elif parent1[i] not in child1:
+    #                 child1[i] = parent1[i]
+    #                 for j in range(i + 1, 81, 1):
+    #                     if parent1[j] == parent1[i] and child1[j] == 0:
+    #                         child1[j] = parent1[j]
+    #     # child2の必要な位置に数字がない
+    #     if HINT_PATTERN[i] == 1 and child2[i] == 0:
+    #         if random.choice([True, False]):
+    #             if parent1[i] not in child2:
+    #                 child2[i] = parent1[i]
+    #                 for j in range(i + 1, 81, 1):
+    #                     if parent1[j] == parent1[i] and child2[j] == 0:
+    #                         child2[j] = parent1[j]
+    #             elif parent2[i] not in child2:
+    #                 child2[i] = parent2[i]
+    #                 for j in range(i + 1, 81, 1):
+    #                     if parent2[j] == parent2[i] and child2[j] == 0:
+    #                         child2[j] = parent2[j]
+    #         else:
+    #             if parent2[i] not in child2:
+    #                 child2[i] = parent2[i]
+    #                 for j in range(i + 1, 81, 1):
+    #                     if parent2[j] == parent2[i] and child2[j] == 0:
+    #                         child2[j] = parent2[j]
+    #             elif parent1[i] not in child2:
+    #                 child2[i] = parent1[i]
+    #                 for j in range(i + 1, 81, 1):
+    #                     if parent1[j] == parent1[i] and child2[j] == 0:
+    #                         child2[j] = parent1[j]
