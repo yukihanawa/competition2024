@@ -60,12 +60,32 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
 
     print("parent1:")
     print(parent1.reshape(9, 9))
-    print() 
+    print()
     print("parent2:")
     print(parent2.reshape(9, 9))
     print()
 
+    hint_index = -1
     for i in range(81):
+        if HINT_PATTERN[i] ==1:
+            if hint_index ==-1:
+                child1[i] = parent1[i]
+                child2[i] = parent2[i]
+                hint_index = i
+            else:
+                if child1[hint_index] != parent2[i]:
+                    child1[i] = parent2[i]
+                else:
+                    child1[i] = parent1[i]
+                if child2[hint_index] != parent1[i]:
+                    child2[i] = parent1[i]
+                else:
+                    child2[i] = parent2[i]
+                hint_index = i
+                break
+
+
+    for i in range(hint_index + 1,81,1):
         # child1の処理
         if HINT_PATTERN[i] == 1 and child1[i] == 0:
             fill_child(child1, parent1, parent2, i)
