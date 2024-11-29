@@ -99,29 +99,25 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
     print("child2:")
     print(child2.reshape(9, 9))
     
-
+    #HINTが埋められなかった場所が発生する可能性があり、その場合にはナンプレを解いて埋める
     for i in range(81):
         if HINT_PATTERN[i] == 1 and child1[i] == 0:
             check_child1 = False
             print("i:", i)
             print()
-    
+
     for i in range(81):
         if HINT_PATTERN[i] == 1 and child2[i] == 0:
             check_child2 = False
             print("i:", i)
             print()
-    
+
     if check_child1 == False:
         child1 = solve_suudoku_2d.solve_suudoku_one(np.array(child1).reshape(9, 9))
-        print("child1:")
-        print(child1)
         child1 = np.array(child1).reshape(81) * HINT_PATTERN
-    
+
     if check_child2 == False:
         child2 = solve_suudoku_2d.solve_suudoku_one(np.array(child2).reshape(9, 9))
-        print("child2:")
-        print(child2)
         child2 = np.array(child2).reshape(81) * HINT_PATTERN
 
     print("child1:")
