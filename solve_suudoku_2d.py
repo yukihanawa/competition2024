@@ -79,6 +79,23 @@ def solve_sudoku_wrapper_2d(board):
     return len(solutions) == 1, solutions
 
 
+#解をひとつ見つける
+def solve_suudoku_one(board):
+    """解を1つ見つけるナンプレ解法"""
+    for row in range(9):
+        for col in range(9):
+            if board[row, col] == 0:  # 空セルを見つけた場合
+                for num in range(1, 10):
+                    if is_valid_2d(board, row, col, num):
+                        board[row, col] = num
+                        result = solve_suudoku_one(board)
+                        if result is not None:  # 解が見つかった場合
+                            return result
+                        board[row, col] = 0  # バックトラック
+                return None  # すべて試しても解が見つからない場合
+    return board  # すべてのセルが埋まった場合（解が見つかった）
+
+
 # テスト問題（2次元リスト形式）
 problem_2d = [
     [2, 0, 0, 0, 0, 0, 0, 0, 9],

@@ -1,6 +1,8 @@
 import numpy as np
 import random
 import evaluate_suudoku
+import solve_suudoku_2d
+
 HINT_PATTERN = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
 
 def is_valid(board, row, col, num):
@@ -47,7 +49,8 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
                     for j in range(i + 1, 81, 1):
                         if parent1[j] == parent1[i] and child1[j] == 0:
                             child1[j] = parent1[j]
-                else:
+                elif parent2[i] not in child1:
+                    print("in child parent1[i]:", parent1[i])
                     #child1にparent2から数字を入れる
                     child1[i] = parent2[i]
                     for j in range(i + 1, 81, 1):
@@ -60,7 +63,7 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
                     for j in range(i + 1, 81, 1):
                         if parent2[j] == parent2[i] and child1[j] == 0:
                             child1[j] = parent2[j]
-                else:
+                elif parent1[i] not in child1:
                     child1[i] = parent1[i]
                     for j in range(i + 1, 81, 1):
                         if parent1[j] == parent1[i] and child1[j] == 0:
@@ -73,7 +76,7 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
                     for j in range(i + 1, 81, 1):
                         if parent1[j] == parent1[i] and child2[j] == 0:
                             child2[j] = parent1[j]
-                else:
+                elif parent2[i] not in child2:
                     child2[i] = parent2[i]
                     for j in range(i + 1, 81, 1):
                         if parent2[j] == parent2[i] and child2[j] == 0:
@@ -84,11 +87,42 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
                     for j in range(i + 1, 81, 1):
                         if parent2[j] == parent2[i] and child2[j] == 0:
                             child2[j] = parent2[j]
-                else:
+                elif parent1[i] not in child2:
                     child2[i] = parent1[i]
                     for j in range(i + 1, 81, 1):
                         if parent1[j] == parent1[i] and child2[j] == 0:
                             child2[j] = parent1[j]
+    
+    print("child1:")
+    print(child1.reshape(9, 9))
+    print()
+    print("child2:")
+    print(child2.reshape(9, 9))
+    
+
+    for i in range(81):
+        if HINT_PATTERN[i] == 1 and child1[i] == 0:
+            check_child1 = False
+            print("i:", i)
+            print()
+    
+    for i in range(81):
+        if HINT_PATTERN[i] == 1 and child2[i] == 0:
+            check_child2 = False
+            print("i:", i)
+            print()
+    
+    if check_child1 == False:
+        child1 = solve_suudoku_2d.solve_suudoku_one(np.array(child1).reshape(9, 9))
+        print("child1:")
+        print(child1)
+        child1 = np.array(child1).reshape(81) * HINT_PATTERN
+    
+    if check_child2 == False:
+        child2 = solve_suudoku_2d.solve_suudoku_one(np.array(child2).reshape(9, 9))
+        print("child2:")
+        print(child2)
+        child2 = np.array(child2).reshape(81) * HINT_PATTERN
 
     print("child1:")
     print(child1.reshape(9, 9))
