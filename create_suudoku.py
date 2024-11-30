@@ -1,6 +1,9 @@
 import numpy as np
 import random
 import math
+import solve_suudoku_2d
+
+HINT_PATTERN = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
 
 
 def create_first_answer():
@@ -80,3 +83,21 @@ def create_answer():
     if random.random() < 0.5:
         answer = change_column(answer)
     return answer.flatten()
+
+def mutate(answer):
+    answer = answer.reshape(9, 9)
+    answer = solve_suudoku_2d.solve_sudoku_fast(answer)
+    if(answer is None):
+        # print("1解が見つかりませんでした")
+        answer = create_first_answer()
+    if random.random() < 0.5:
+        answer = change_row_block(answer)
+    if random.random() < 0.5:
+        answer = change_column_block(answer)
+    if random.random() < 0.5:
+        answer = change_row(answer)
+    if random.random() < 0.5:
+        answer = change_column(answer)
+    # print("answer:",answer)
+    answer = answer.flatten()*HINT_PATTERN
+    return answer

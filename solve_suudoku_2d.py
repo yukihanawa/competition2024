@@ -1,3 +1,4 @@
+import numpy as np
 def solve_sudoku_all_2d(board, solutions, max_solutions=2):
     """
     2次元リスト形式の数独ソルバー。
@@ -95,19 +96,75 @@ def solve_suudoku_one(board):
                 return None  # すべて試しても解が見つからない場合
     return board  # すべてのセルが埋まった場合（解が見つかった）
 
+def find_best_cell(board):
+    """候補が最も少ないセルを探す"""
+    min_options = 10  # 最大9なので、初期値を10に設定
+    best_cell = None
+
+    for row in range(9):
+        for col in range(9):
+            if board[row, col] == 0:
+                options = sum(1 for num in range(1, 10) if is_valid_2d(board, row, col, num))
+                if options == 0:
+                    return None
+                if options < min_options:
+                    min_options = options
+                    best_cell = (row, col)
+    return best_cell
+
+# def solve_sudoku_fast(board):
+#     """高速なナンプレ解法"""
+#     cell = find_best_cell(board)
+#     if not cell:
+#         return board  # 解けた
+#     row, col = cell
+#     for num in range(1, 10):
+#         if is_valid_2d(board, row, col, num):
+#             board[row, col] = num
+#             result = solve_sudoku_fast(board)
+#             if result is not None:
+#                 return result
+#             board[row, col] = 0  # バックトラック
+
+#     return None  # 解なし
+
+def solve_sudoku_fast(board):
+    """高速なナンプレ解法"""
+    # すべてのセルが埋まっているか確認
+    if all(board[row, col] != 0 for row in range(9) for col in range(9)):
+        return board  # すべてのセルが埋まっている場合にboardを返す
+    
+    cell = find_best_cell(board)
+    if not cell:
+        return None  # 解けない場合はNoneを返す
+
+    row, col = cell
+    for num in range(1, 10):
+        if is_valid_2d(board, row, col, num):
+            board[row, col] = num
+            result = solve_sudoku_fast(board)  # 再帰的に解を探索
+            if result is not None:  # 解が見つかった場合
+                return result
+            else:
+                return None
+            board[row, col] = 0  # バックトラック
+
+    return None  # 解なし（解けなかった場合）
 
 # テスト問題（2次元リスト形式）
-problem_2d = [
-    [2, 0, 0, 0, 0, 0, 0, 0, 9],
-    [0, 0, 6, 8, 0, 7, 4, 0, 0],
-    [0, 4, 0, 0, 6, 0, 0, 2, 0],
-    [0, 5, 0, 0, 0, 0, 0, 3, 0],
-    [0, 0, 2, 0, 0, 0, 7, 0, 0],
-    [0, 7, 0, 0, 0, 0, 0, 8, 0],
-    [0, 9, 0, 0, 8, 0, 0, 6, 0],
-    [0, 0, 1, 7, 0, 2, 5, 0, 0],
-    [7, 0, 0, 0, 0, 0, 0, 0, 3],
-]
+# problem_2d = [
+#     [1, 0, 0, 0, 0, 0, 0, 0, 9],
+#     [0, 0, 6, 8, 0, 7, 4, 0, 0],
+#     [0, 4, 0, 0, 6, 0, 0, 2, 0],
+#     [0, 5, 0, 0, 0, 0, 0, 3, 0],
+#     [0, 0, 2, 0, 0, 0, 7, 0, 0],
+#     [0, 7, 0, 0, 0, 0, 0, 8, 0],
+#     [0, 9, 0, 0, 8, 0, 0, 6, 0],
+#     [0, 0, 1, 7, 0, 2, 5, 0, 0],
+#     [7, 0, 0, 0, 0, 0, 0, 0, 3],
+# ]
 
 # 実行
 # solve_sudoku_wrapper_2d(problem_2d)
+# print(not None)
+# print(solve_sudoku_fast(np.array(problem_2d)))

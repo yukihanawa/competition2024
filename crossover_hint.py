@@ -16,19 +16,6 @@ def is_valid(board, row, col, num):
 
     return True
 
-def solve_sudoku(board, solutions):
-    """バックトラック法で数独を解き、すべての解をリストに追加します。"""
-    for row in range(9):
-        for col in range(9):
-            if board[row, col] == 0:  # 空きセルを見つけた場合
-                for num in range(1, 10):
-                    if is_valid(board, row, col, num):
-                        board[row, col] = num
-                        solve_sudoku(board, solutions)
-                        board[row, col] = 0  # 戻す（バックトラック）
-                return  # 他の可能性を試すために戻る
-    solutions.append(board.copy())
-
 def fill_child(child, parent1, parent2, i):
     """
     指定された子 (child) の必要な位置を親 (parent1, parent2) から埋める関数
@@ -58,12 +45,12 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
     parent1 = np.array(parent1) * HINT_PATTERN
     parent2 = np.array(parent2) * HINT_PATTERN
 
-    print("parent1:")
-    print(parent1.reshape(9, 9))
-    print()
-    print("parent2:")
-    print(parent2.reshape(9, 9))
-    print()
+    # print("parent1:")
+    # print(parent1.reshape(9, 9))
+    # print()
+    # print("parent2:")
+    # print(parent2.reshape(9, 9))
+    # print()
 
     hint_index = -1
     for i in range(81):
@@ -114,19 +101,30 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
             # print("i:", i)
             # print()
 
+    #交叉した個体の解が存在しない場合、ナンプレを解いて埋める（解が存在しない場合は親をそのまま使う）
     if check_child1 == False:
-        child1 = solve_suudoku_2d.solve_suudoku_one(np.array(child1).reshape(9, 9))
-        child1 = np.array(child1).reshape(81) * HINT_PATTERN
+        # print("解の作成中...")
+        child1 = solve_suudoku_2d.solve_sudoku_fast(np.array(child1).reshape(9, 9))
+        if(child1 is not None):
+            child1 = np.array(child1).reshape(81) * HINT_PATTERN
+        else:
+            child1 = parent1
+        # print("解の作成完了")
 
     if check_child2 == False:
-        child2 = solve_suudoku_2d.solve_suudoku_one(np.array(child2).reshape(9, 9))
-        child2 = np.array(child2).reshape(81) * HINT_PATTERN
+        # print("解の作成中...")
+        child2 = solve_suudoku_2d.solve_sudoku_fast(np.array(child2).reshape(9, 9))
+        if(child2 is not None):
+            child2 = np.array(child2).reshape(81) * HINT_PATTERN
+        else:
+            child2 = parent2
+        # print("解の作成完了")
 
-    print("child1:")
-    print(child1.reshape(9, 9))
-    print()
-    print("child2:")
-    print(child2.reshape(9, 9))
+    # print("child1:")
+    # print(child1.reshape(9, 9))
+    # print()
+    # print("child2:")
+    # print(child2.reshape(9, 9))
     child1_eval = evaluate_suudoku.evaluate_sudoku_2d_strict(np.array(child1).reshape(9, 9))
     child2_eval = evaluate_suudoku.evaluate_sudoku_2d_strict(np.array(child2).reshape(9, 9))
 
@@ -142,44 +140,44 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
 
 
 # サンプル親個体（完全に埋まった数独）
-parent1 = [
-    5, 3, 4, 6, 7, 8, 9, 1, 2,
-    6, 7, 2, 1, 9, 5, 3, 4, 8,
-    1, 9, 8, 3, 4, 2, 5, 6, 7,
-    8, 5, 9, 7, 6, 1, 4, 2, 3,
-    4, 2, 6, 8, 5, 3, 7, 9, 1,
-    7, 1, 3, 9, 2, 4, 8, 5, 6,
-    9, 6, 1, 5, 3, 7, 2, 8, 4,
-    2, 8, 7, 4, 1, 9, 6, 3, 5,
-    3, 4, 5, 2, 8, 6, 1, 7, 9
-]
+# parent1 = [
+#     5, 3, 4, 6, 7, 8, 9, 1, 2,
+#     6, 7, 2, 1, 9, 5, 3, 4, 8,
+#     1, 9, 8, 3, 4, 2, 5, 6, 7,
+#     8, 5, 9, 7, 6, 1, 4, 2, 3,
+#     4, 2, 6, 8, 5, 3, 7, 9, 1,
+#     7, 1, 3, 9, 2, 4, 8, 5, 6,
+#     9, 6, 1, 5, 3, 7, 2, 8, 4,
+#     2, 8, 7, 4, 1, 9, 6, 3, 5,
+#     3, 4, 5, 2, 8, 6, 1, 7, 9
+# ]
 
-parent2 = [
-    8, 2, 7, 1, 5, 4, 3, 9, 6,
-    9, 6, 5, 3, 2, 7, 1, 4, 8,
-    3, 4, 1, 6, 8, 9, 7, 5, 2,
-    5, 9, 3, 4, 6, 8, 2, 7, 1,
-    4, 7, 2, 5, 1, 3, 6, 8, 9,
-    6, 1, 8, 9, 7, 2, 4, 3, 5,
-    7, 8, 6, 2, 3, 5, 9, 1, 4,
-    1, 5, 4, 7, 9, 6, 8, 2, 3,
-    2, 3, 9, 8, 4, 1, 5, 6, 7
-]
+# parent2 = [
+#     8, 2, 7, 1, 5, 4, 3, 9, 6,
+#     9, 6, 5, 3, 2, 7, 1, 4, 8,
+#     3, 4, 1, 6, 8, 9, 7, 5, 2,
+#     5, 9, 3, 4, 6, 8, 2, 7, 1,
+#     4, 7, 2, 5, 1, 3, 6, 8, 9,
+#     6, 1, 8, 9, 7, 2, 4, 3, 5,
+#     7, 8, 6, 2, 3, 5, 9, 1, 4,
+#     1, 5, 4, 7, 9, 6, 8, 2, 3,
+#     2, 3, 9, 8, 4, 1, 5, 6, 7
+# ]
 
 
-parent1_eval = evaluate_suudoku.evaluate_sudoku_2d_strict(np.array(parent1).reshape(9, 9))
-parent2_eval = evaluate_suudoku.evaluate_sudoku_2d_strict(np.array(parent2).reshape(9, 9))
+# parent1_eval = evaluate_suudoku.evaluate_sudoku_2d_strict(np.array(parent1).reshape(9, 9))
+# parent2_eval = evaluate_suudoku.evaluate_sudoku_2d_strict(np.array(parent2).reshape(9, 9))
 
-#hintを9*9で表示
-for i in range(81):
-    if i % 9 == 0:
-        print()
-    print(HINT_PATTERN[i], end=" ")
-print()
+# #hintを9*9で表示
+# for i in range(81):
+#     if i % 9 == 0:
+#         print()
+#     print(HINT_PATTERN[i], end=" ")
+# print()
 
 
 # 交叉
-parent1, parent2, parent1_eval, parent2_eval = crossover(parent1, parent2, parent1_eval, parent2_eval)
+# parent1, parent2, parent1_eval, parent2_eval = crossover(parent1, parent2, parent1_eval, parent2_eval)
 
 # 結果を表示
 #ヒントを9*9行列で表示
