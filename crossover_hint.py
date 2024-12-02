@@ -118,22 +118,22 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
 
     #交叉した個体の解が存在しない場合、ナンプレを解いて埋める（解が存在しない場合は親をそのまま使う）
     if check_child1 == False:
-        print("解の作成中...")
+        # print("解の作成中...")
         child1 = solve_suudoku_2d.solve_sudoku_fast(np.array(child1).reshape(9, 9))
         if(child1 is not None):
             child1 = np.array(child1).reshape(81) * HINT_PATTERN
         else:
             child1 = parent1
-        print("解の作成完了")
+        # print("解の作成完了")
 
     if check_child2 == False:
-        print("解の作成中...")
+        # print("解の作成中...")
         child2 = solve_suudoku_2d.solve_sudoku_fast(np.array(child2).reshape(9, 9))
         if(child2 is not None):
             child2 = np.array(child2).reshape(81) * HINT_PATTERN
         else:
             child2 = parent2
-        print("解の作成完了")
+        # print("解の作成完了")
 
     # print("child1:")
     # print(child1.reshape(9, 9))

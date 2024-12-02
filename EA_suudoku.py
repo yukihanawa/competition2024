@@ -6,12 +6,12 @@ import numpy as np
 import random
 
 HINT_PATTERN = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
-population = 50 #個体数
-max_generation = 20 #最大世代数
+population = 20 #個体数
+max_generation = 30 #最大世代数
 cr = 0.7 #交叉率
-cn = round(population * cr) #交叉数
+cn = 2 * round(cr * population/2) #交叉数
 mr = 0.3 #突然変異率
-
+print("cn:",cn//2)
 #問題の整合性を確認
 # 問題の整合性を確認
 def check_problem(answer, a):
@@ -75,8 +75,8 @@ for i in range(max_generation):
     evaluation_mutate = evaluation[cn:]
     print("cossover:",i)
     #交叉
-    for j in range(0, cn, 2):
-        answer_cross[j,:], answer_cross[j+1,:], evaluation_cross[j], evaluation_cross[j+1] = crossover_hint.crossover(answer_cross[j,:], answer_cross[j+1,:], evaluation_cross[j], evaluation_cross[j+1])
+    for j in range(0, cn//2):
+        answer_cross[2*j,:], answer_cross[2*j + 1,:], evaluation_cross[2*j], evaluation_cross[2*j+1] = crossover_hint.crossover(answer_cross[2*j,:], answer_cross[2*j+1,:], evaluation_cross[2*j], evaluation_cross[2*j+1])
         for k in range(81):
             if HINT_PATTERN[k] == 1 and answer_cross[j,k] == 0:
                 print("正しく交叉されていません")
@@ -123,6 +123,10 @@ for i in range(max_generation):
 
     
     print("best_parent_eval[",i,"]=",evaluation[0])
+    print("list of evaluation:")
+    print(evaluation)
+
+
 
 
 #最も評価値が高い解を出力
