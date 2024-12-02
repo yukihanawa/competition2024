@@ -36,6 +36,12 @@ def fill_child(child, parent1, parent2, i):
             if secondary[j] == secondary[i] and child[j] == 0:
                 child[j] = secondary[j]
 
+#後ろに同じ数字がある場合、それを埋める
+def fill_child_rest(child, parent, i):
+    for j in range(i + 1, 81):
+        if parent[j] == parent[i] and child[j] == 0 and HINT_PATTERN[j] == 1:
+            child[j] = parent[j]
+
 
 def crossover(parent1, parent2, parent1_eval, parent2_eval):
     """親1と親2から位置が被らない数値ペアを選び、子供を生成します。"""
@@ -53,21 +59,30 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
     # print()
 
     hint_index = -1
+    #最初の二つは任意の親から数字を入れたい
     for i in range(81):
         if HINT_PATTERN[i] ==1:
+            #ヒントが入るべき場所
             if hint_index ==-1:
+                #初めてヒントが入るべき場所に到達
                 child1[i] = parent1[i]
                 child2[i] = parent2[i]
                 hint_index = i
+                fill_child_rest(child1, parent1, i)
+                fill_child_rest(child2, parent2, i)
             else:
                 if child1[hint_index] != parent2[i]:
                     child1[i] = parent2[i]
+                    fill_child_rest(child1, parent2, i)
                 else:
                     child1[i] = parent1[i]
+                    fill_child_rest(child1, parent1, i)
                 if child2[hint_index] != parent1[i]:
                     child2[i] = parent1[i]
+                    fill_child_rest(child2, parent1, i)
                 else:
                     child2[i] = parent2[i]
+                    fill_child_rest(child2, parent2, i)
                 hint_index = i
                 break
 
@@ -103,22 +118,22 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
 
     #交叉した個体の解が存在しない場合、ナンプレを解いて埋める（解が存在しない場合は親をそのまま使う）
     if check_child1 == False:
-        # print("解の作成中...")
+        print("解の作成中...")
         child1 = solve_suudoku_2d.solve_sudoku_fast(np.array(child1).reshape(9, 9))
         if(child1 is not None):
             child1 = np.array(child1).reshape(81) * HINT_PATTERN
         else:
             child1 = parent1
-        # print("解の作成完了")
+        print("解の作成完了")
 
     if check_child2 == False:
-        # print("解の作成中...")
+        print("解の作成中...")
         child2 = solve_suudoku_2d.solve_sudoku_fast(np.array(child2).reshape(9, 9))
         if(child2 is not None):
             child2 = np.array(child2).reshape(81) * HINT_PATTERN
         else:
             child2 = parent2
-        # print("解の作成完了")
+        print("解の作成完了")
 
     # print("child1:")
     # print(child1.reshape(9, 9))

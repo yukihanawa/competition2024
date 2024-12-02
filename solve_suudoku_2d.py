@@ -145,15 +145,13 @@ def solve_sudoku_fast(board):
             result = solve_sudoku_fast(board)  # 再帰的に解を探索
             if result is not None:  # 解が見つかった場合
                 return result
-            else:
-                return None
             board[row, col] = 0  # バックトラック
 
     return None  # 解なし（解けなかった場合）
 
 # テスト問題（2次元リスト形式）
 # problem_2d = [
-#     [1, 0, 0, 0, 0, 0, 0, 0, 9],
+#     [8, 0, 0, 0, 0, 0, 0, 0, 5],
 #     [0, 0, 6, 8, 0, 7, 4, 0, 0],
 #     [0, 4, 0, 0, 6, 0, 0, 2, 0],
 #     [0, 5, 0, 0, 0, 0, 0, 3, 0],

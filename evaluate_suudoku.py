@@ -58,7 +58,7 @@ def evaluate_sudoku_2d_strict(board):
 
     # 評価値を計算
     evaluation = (
-        max_depth[0] * 5  # バックトラッキング深さに基づく重み
+         - max_depth[0] * 5  # バックトラッキング深さに基づく重み
         - (10000 if solutions > 1 else 0)  # 複数解なら大きなペナルティ
     )
 

@@ -1,132 +1,81 @@
-例1:
-parent1:
-[[5 0 0 0 0 0 0 0 2]
- [0 0 2 1 0 5 3 0 0]
- [0 9 0 0 4 0 0 6 0]
- [0 5 0 0 0 0 0 2 0]
- [0 0 6 0 0 0 7 0 0]
- [0 1 0 0 0 0 0 5 0]
- [0 6 0 0 3 0 0 8 0]
- [0 0 7 4 0 9 6 0 0]
- [3 0 0 0 0 0 0 0 9]]
-
-parent2:
-[[8 0 0 0 0 0 0 0 6]
- [0 0 5 3 0 7 1 0 0]
- [0 4 0 0 8 0 0 5 0]
- [0 9 0 0 0 0 0 7 0]
- [0 0 2 0 0 0 6 0 0]
- [0 1 0 0 0 0 0 3 0]
- [0 8 0 0 3 0 0 1 0]
- [0 0 4 7 0 6 8 0 0]
- [2 0 0 0 0 0 0 0 7]]
-
-child1:
-[[5 0 0 0 0 0 0 0 6]
- [0 0 2 3 0 7 1 0 0]
- [0 9 0 0 8 0 0 4 0]
- [0 7 0 0 0 0 0 2 0]
- [0 0 8 0 0 0 6 0 0]
- [0 1 0 0 0 0 0 3 0]
- [0 8 0 0 3 0 0 1 0]
- [0 0 4 7 0 9 8 0 0]
- [1 0 0 0 0 0 0 0 7]]
-
-child2:
-[[8 0 0 0 0 0 0 0 2]
- [0 0 5 3 0 7 1 0 0]
- [0 4 0 0 2 0 0 5 0]
- [0 9 0 0 0 0 0 7 0]
- [0 0 6 0 0 0 2 0 0]
- [0 1 0 0 0 0 0 3 0]
- [0 6 0 0 3 0 0 1 0]
- [0 0 4 7 0 5 6 0 0]
- [3 0 0 0 0 0 0 0 7]]
-例2:
-parent1:
-[[5 0 0 0 0 0 0 0 2]
- [0 0 2 1 0 5 3 0 0]
- [0 9 0 0 4 0 0 6 0]
- [0 5 0 0 0 0 0 2 0]
- [0 0 6 0 0 0 7 0 0]
- [0 1 0 0 0 0 0 5 0]
- [0 6 0 0 3 0 0 8 0]
- [0 0 7 4 0 9 6 0 0]
- [3 0 0 0 0 0 0 0 9]]
-
-parent2:
-[[8 0 0 0 0 0 0 0 6]
- [0 0 5 3 0 7 1 0 0]
- [0 4 0 0 8 0 0 5 0]
- [0 9 0 0 0 0 0 7 0]
- [0 0 2 0 0 0 6 0 0]
- [0 1 0 0 0 0 0 3 0]
- [0 8 0 0 3 0 0 1 0]
- [0 0 4 7 0 6 8 0 0]
- [2 0 0 0 0 0 0 0 7]]
-
-child1:
-[[5 0 0 0 0 0 0 0 6]
- [0 0 2 3 0 7 1 0 0]
- [0 9 0 0 4 0 0 5 0]
- [0 4 0 0 0 0 0 2 0]
- [0 0 9 0 0 0 5 0 0]
- [0 1 0 0 0 0 0 3 0]
- [0 8 0 0 3 0 0 1 0]
- [0 0 3 7 0 9 8 0 0]
- [6 0 0 0 0 0 0 0 7]]
-
-child2:
-[[8 0 0 0 0 0 0 0 2]
- [0 0 5 1 0 7 3 0 0]
- [0 4 0 0 8 0 0 5 0]
- [0 9 0 0 0 0 0 7 0]
- [0 0 6 0 0 0 5 0 0]
- [0 1 0 0 0 0 0 6 0]
- [0 6 0 0 3 0 0 8 0]
- [0 0 4 7 0 8 6 0 0]
- [3 0 0 0 0 0 0 0 7]]
-例3:
-parent1:
-[[5 0 0 0 0 0 0 0 2]
- [0 0 2 1 0 5 3 0 0]
- [0 9 0 0 4 0 0 6 0]
- [0 5 0 0 0 0 0 2 0]
- [0 0 6 0 0 0 7 0 0]
- [0 1 0 0 0 0 0 5 0]
- [0 6 0 0 3 0 0 8 0]
- [0 0 7 4 0 9 6 0 0]
- [3 0 0 0 0 0 0 0 9]]
-
-parent2:
-[[8 0 0 0 0 0 0 0 6]
- [0 0 5 3 0 7 1 0 0]
- [0 4 0 0 8 0 0 5 0]
- [0 9 0 0 0 0 0 7 0]
- [0 0 2 0 0 0 6 0 0]
- [0 1 0 0 0 0 0 3 0]
- [0 8 0 0 3 0 0 1 0]
- [0 0 4 7 0 6 8 0 0]
- [2 0 0 0 0 0 0 0 7]]
-
-child1:
-[[5 0 0 0 0 0 0 0 6]
- [0 0 2 1 0 7 3 0 0]
- [0 4 0 0 8 0 0 5 0]
- [0 9 0 0 0 0 0 2 0]
- [0 0 5 0 0 0 9 0 0]
- [0 1 0 0 0 0 0 7 0]
- [0 8 0 0 3 0 0 9 0]
- [0 0 4 7 0 5 8 0 0]
- [3 0 0 0 0 0 0 0 7]]
-
-child2:
-[[8 0 0 0 0 0 0 0 2]
- [0 0 5 3 0 7 1 0 0]
- [0 9 0 0 4 0 0 5 0]
- [0 2 0 0 0 0 0 7 0]
- [0 0 6 0 0 0 4 0 0]
- [0 1 0 0 0 0 0 3 0]
- [0 6 0 0 3 0 0 1 0]
- [0 0 2 7 0 9 6 0 0]
- [1 0 0 0 0 0 0 0 7]]
+best_parent_eval[ 0 ]= -9715
+best_parent_eval[ 1 ]= -9715
+best_parent_eval[ 2 ]= -9715
+best_parent_eval[ 3 ]= -9715
+best_parent_eval[ 4 ]= -9715
+best_parent_eval[ 5 ]= -9715
+best_parent_eval[ 6 ]= -9715
+best_parent_eval[ 7 ]= -9715
+best_parent_eval[ 8 ]= -9715
+best_parent_eval[ 9 ]= 20
+best_parent_eval[ 10 ]= 20
+best_parent_eval[ 11 ]= 20
+best_parent_eval[ 12 ]= 20
+best_parent_eval[ 13 ]= 20
+best_parent_eval[ 14 ]= 20
+best_parent_eval[ 15 ]= 20
+best_parent_eval[ 16 ]= 20
+best_parent_eval[ 17 ]= 20
+best_parent_eval[ 18 ]= 20
+best_parent_eval[ 19 ]= 20
+best_parent_eval[ 20 ]= 20
+best_parent_eval[ 21 ]= 20
+best_parent_eval[ 22 ]= 110
+best_parent_eval[ 23 ]= 110
+best_parent_eval[ 24 ]= 110
+best_parent_eval[ 25 ]= 110
+best_parent_eval[ 26 ]= 110
+best_parent_eval[ 27 ]= 160
+best_parent_eval[ 28 ]= 160
+best_parent_eval[ 29 ]= 160
+best_parent_eval[ 30 ]= 235
+best_parent_eval[ 31 ]= 235
+best_parent_eval[ 32 ]= 235
+best_parent_eval[ 33 ]= 235
+best_parent_eval[ 34 ]= 235
+best_parent_eval[ 35 ]= 235
+best_parent_eval[ 36 ]= 235
+best_parent_eval[ 37 ]= 235
+best_parent_eval[ 38 ]= 235
+best_parent_eval[ 39 ]= 235
+best_parent_eval[ 40 ]= 235
+best_parent_eval[ 41 ]= 235
+best_parent_eval[ 42 ]= 235
+best_parent_eval[ 43 ]= 235
+best_parent_eval[ 44 ]= 235
+best_parent_eval[ 45 ]= 235
+best_parent_eval[ 46 ]= 235
+best_parent_eval[ 47 ]= 235
+best_parent_eval[ 48 ]= 235
+best_parent_eval[ 49 ]= 235
+best_parent_eval[ 50 ]= 235
+best_parent_eval[ 51 ]= 235
+best_parent_eval[ 52 ]= 235
+best_parent_eval[ 53 ]= 235
+best_parent_eval[ 54 ]= 235
+best_parent_eval[ 55 ]= 235
+best_parent_eval[ 56 ]= 235
+best_parent_eval[ 57 ]= 240
+best_parent_eval[ 58 ]= 240
+best_parent_eval[ 59 ]= 240
+best_parent_eval[ 60 ]= 240
+best_parent_eval[ 61 ]= 240
+best_parent_eval[ 62 ]= 240
+best_parent_eval[ 63 ]= 240
+best_parent_eval[ 64 ]= 240
+best_parent_eval[ 65 ]= 240
+best_parent_eval[ 66 ]= 240
+best_parent_eval[ 67 ]= 240
+best_parent_eval[ 68 ]= 240
+best_parent_eval[ 69 ]= 240
+best_parent_eval[ 70 ]= 240
+best_parent_eval[ 71 ]= 240
+best_parent_eval[ 72 ]= 240
+best_parent_eval[ 73 ]= 240
+best_parent_eval[ 74 ]= 240
+best_parent_eval[ 75 ]= 240
+best_parent_eval[ 76 ]= 240
+best_parent_eval[ 77 ]= 240
+best_parent_eval[ 78 ]= 240
+best_parent_eval[ 79 ]= 240
+best_parent_eval[ 80 ]= 240
