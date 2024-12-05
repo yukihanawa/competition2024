@@ -2,7 +2,7 @@ import create_suudoku as create
 import evaluate_suudoku
 import crossover_hint
 import solve_suudoku_2d
-import find_all
+import _find_all
 import numpy as np
 import random
 
