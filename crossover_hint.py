@@ -2,6 +2,7 @@ import numpy as np
 import random
 import evaluate_suudoku
 import solve_suudoku_2d
+import create_suudoku as create
 
 HINT_PATTERN = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
 
@@ -123,7 +124,7 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
         if(child1 is not None):
             child1 = np.array(child1).reshape(81) * HINT_PATTERN
         else:
-            child1 = parent1
+            child1 = create.mutate(parent1)
         # print("解の作成完了")
 
     if check_child2 == False:
@@ -132,7 +133,7 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
         if(child2 is not None):
             child2 = np.array(child2).reshape(81) * HINT_PATTERN
         else:
-            child2 = parent2
+            child2 = create.mutate(parent2)
         # print("解の作成完了")
 
     # print("child1:")
@@ -143,13 +144,13 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
     child1_eval = evaluate_suudoku.evaluate_sudoku_2d_strict(np.array(child1).reshape(9, 9))
     child2_eval = evaluate_suudoku.evaluate_sudoku_2d_strict(np.array(child2).reshape(9, 9))
 
-    if child1_eval > parent1_eval:
-        parent1 = child1
-        parent1_eval = child1_eval
+    # if child1_eval > parent1_eval:
+    parent1 = child1
+    parent1_eval = child1_eval
     
-    if child2_eval > parent2_eval:
-        parent2 = child2
-        parent2_eval = child2_eval
+    # if child2_eval > parent2_eval:
+    parent2 = child2
+    parent2_eval = child2_eval
     
     return parent1, parent2, parent1_eval, parent2_eval
 

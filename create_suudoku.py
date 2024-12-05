@@ -59,15 +59,6 @@ def change_column_block(answer):
         answer[:,(a-1)*3:a*3], answer[:,(b-1)*3:b*3] = answer[:,(b-1)*3:b*3].copy(), answer[:,(a-1)*3:a*3].copy()
     return answer
 
-#1~3行目or4~6行目or7~9行目の中で行を入れ替える(ランダム)
-# def change_row(answer):
-#     a = random.randint(1, 3)
-#     b = random.randint(1, 3)
-#     if a == b:
-#         change_row(answer)
-#     else:
-#         answer[(a-1)*3,:], answer[(b-1)*3,:] = answer[(b-1)*3,:].copy(), answer[(a-1)*3,:].copy()
-#     return answer
 # 1~3行目or4~6行目or7~9行目の中で行を入れ替える（ランダム）
 def change_row(answer):
     # 1~3, 4~6, 7~9のいずれかのブロックをランダムに選ぶ
@@ -82,15 +73,6 @@ def change_row(answer):
 
     return answer
 
-#1~3列目or4~6列目or7~9列目の中で列を入れ替える(ランダム)
-# def change_column(answer):
-#     a = random.randint(1, 3)
-#     b = random.randint(1, 3)
-#     if a == b:
-#         change_column(answer)
-#     else:
-#         answer[:,(a-1)*3:(a*3)], answer[:,(b-1)*3:(b*3)] = answer[:,(b-1)*3:(b*3)].copy(), answer[:,(a-1)*3:(a*3)].copy()
-#     return answer
 # 1~3列目or4~6列目or7~9列目の中で列を入れ替える（ランダム）
 def change_column(answer):
     # 1~3, 4~6, 7~9のいずれかの列ブロックをランダムに選ぶ
@@ -105,22 +87,17 @@ def change_column(answer):
 
     return answer
 
-# answer = create_first_answer(answer)
-# answer = change_row_block(answer)
-# answer = change_column_block(answer)
-# answer = change_row(answer)
-# answer = change_column(answer)
-# print(answer)
 
 def create_answer():
     answer = create_first_answer()
-    if random.random() < 0.5:
+    for i in range(20):
+        
         answer = change_row_block(answer)
-    if random.random() < 0.5:
+
         answer = change_column_block(answer)
-    if random.random() < 0.5:
+    
         answer = change_row(answer)
-    if random.random() < 0.5:
+    
         answer = change_column(answer)
     return answer.flatten()
 
@@ -137,18 +114,19 @@ def mutate(answer):
     else:
         # print("突然変異させる前のanswer:")
         # print(answer)
-        if random.random() < 0.5:
-            # print("突然変異：１")
-            answer = change_row_block(answer)
-        if random.random() < 0.5:
-            # print("突然変異：２")
-            answer = change_column_block(answer)
-        if random.random() < 0.5:
-            # print("突然変異：３")
-            answer = change_row(answer)
-        if random.random() < 0.5:
-            # print("突然変異：４")
-            answer = change_column(answer)
+        for i in range(10):
+            if random.random() < 0.5:
+                # print("突然変異：１")
+                answer = change_row_block(answer)
+            if random.random() < 0.5:
+                # print("突然変異：２")
+                answer = change_column_block(answer)
+            if random.random() < 0.5:
+                # print("突然変異：３")
+                answer = change_row(answer)
+            if random.random() < 0.5:
+                # print("突然変異：４")
+                answer = change_column(answer)
         # print("突然変異させた後のanswer:")
         # print(answer)
     answer = answer.flatten()*HINT_PATTERN

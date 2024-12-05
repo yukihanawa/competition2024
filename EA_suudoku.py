@@ -2,12 +2,13 @@ import create_suudoku as create
 import evaluate_suudoku
 import crossover_hint
 import solve_suudoku_2d
+import find_all
 import numpy as np
 import random
 
 HINT_PATTERN = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
 population = 20 #個体数
-max_generation = 30 #最大世代数
+max_generation = 20 #最大世代数
 cr = 0.7 #交叉率
 cn = 2 * round(cr * population/2) #交叉数
 mr = 0.3 #突然変異率
@@ -39,20 +40,35 @@ def convert_1d_to_2d(board):
 #1世代の個体数は20
 #初期解生成
 answer = np.zeros((population,81), dtype=int)
+pre_answer = np.zeros((population * 5,81), dtype=int)
 
 #初期解生成（20個作成）
-for i in range(population):
-    answer[i,:] = create.create_answer()
+for i in range(population * 5):
+    pre_answer[i,:] = create.create_answer()
+
+# print("初期解")
+# for i in range(population):
+#     print(np.unique(answer[i,:]*HINT_PATTERN))
 
 #初期解の評価
 evaluation = np.zeros(population, dtype=int)
-for i in range(population):
-    evaluation[i] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer[i,:]*HINT_PATTERN))
+pre_evaluation = np.zeros(population * 5, dtype=int)
+for i in range(population * 5):
+    pre_evaluation[i] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(pre_answer[i,:]*HINT_PATTERN))
 
-#評価値の高い順にソート
-index = np.argsort(-evaluation)
-answer = answer[index,:]
-evaluation = evaluation[index]
+#上位population個を選択
+index = np.argsort(pre_evaluation)
+index = index[0:population]
+answer = pre_answer[index,:]
+evaluation = pre_evaluation[index]
+
+# for i in range(population):
+#     print("evaluation[",i,"]=",evaluation[i])
+
+#評価値の低い順にソート
+# index = np.argsort(evaluation)
+# answer = answer[index,:]
+# evaluation = evaluation[index]
 
 check_problem(answer, "初期解")
 
@@ -60,20 +76,20 @@ check_problem(answer, "初期解")
 #親の評価値が最も高いものを選ぶ
 for i in range(max_generation):
     print("generation[",i,"]")
-    #最良個体は保存
-    best_parent = answer[0,:]
-    best_parent_eval = evaluation[0]
+    # #最良個体は保存
+    # best_parent = answer[0,:]
+    # best_parent_eval = evaluation[0]
     #親をランダムに並び替え
     index = np.random.permutation(population)
     answer = answer[index,:]
     evaluation = evaluation[index]
 
     #交叉させる個体
-    answer_cross = answer[0:cn,:]
-    evaluation_cross = evaluation[0:cn]
-    answer_mutate = answer[cn:,:]
-    evaluation_mutate = evaluation[cn:]
-    print("cossover:",i)
+    answer_cross = answer[0:cn,:].copy()
+    evaluation_cross = evaluation[0:cn].copy()
+    answer_mutate = answer[cn:,:].copy()
+    evaluation_mutate = evaluation[cn:].copy()
+    # print("cossover:",i)
     #交叉
     for j in range(0, cn//2):
         answer_cross[2*j,:], answer_cross[2*j + 1,:], evaluation_cross[2*j], evaluation_cross[2*j+1] = crossover_hint.crossover(answer_cross[2*j,:], answer_cross[2*j+1,:], evaluation_cross[2*j], evaluation_cross[2*j+1])
@@ -83,7 +99,7 @@ for i in range(max_generation):
     
     check_problem(answer_cross, "交叉")
     
-    print("mutate:",i)
+    # print("mutate:",i)
     #突然変異
     for j in range(population - cn):
         answer_mutate[j,:] = create.mutate(answer_mutate[j,:])
@@ -96,27 +112,21 @@ for i in range(max_generation):
                 print("正しく突然変異されていません")
     # print("突然変異終了")
     check_problem(answer_mutate, "突然変異")
-    
-    #交叉と突然変異で生成した個体を結合
-    answer = np.vstack((answer_cross, answer_mutate))
-    evaluation = np.hstack((evaluation_cross, evaluation_mutate))
+
+    #交叉と突然変異で生成した個体を結合 + 親
+    answer = np.vstack((answer_cross, answer_mutate, answer))
+    evaluation = np.hstack((evaluation_cross, evaluation_mutate, evaluation))
 
     # #すべての個体を表示
     # print("generation[",i,"]が終わった")
     # for j in range(population):
     #     print(answer[j,:].reshape(9, 9))
 
-    #評価値の高い順にソート
-    index = np.argsort(-evaluation)
-    answer = answer[index,:]
-    evaluation = evaluation[index]
 
-    #最良個体を保存
-    answer[population-1,:] = best_parent
-    evaluation[population-1] = best_parent_eval
-
-    #評価値の高い順にソート
-    index = np.argsort(-evaluation)
+    #評価値の低い順にソート
+    index = np.argsort(evaluation)
+    index = index[0:population]
+    # print("index:",index)
     answer = answer[index,:]
     evaluation = evaluation[index]
 
@@ -128,7 +138,10 @@ for i in range(max_generation):
 
 
 
-
 #最も評価値が高い解を出力
 print(answer[0,:].reshape(9, 9))
 print(evaluation[0])
+# print("評価値が最も高い解")
+# print((np.array(answer[0,:] * HINT_PATTERN)).reshape(9, 9))
+# a = find_all.solve_sudoku(convert_1d_to_2d(answer[0,:] * HINT_PATTERN))
+# find_all.print_solutions(a)
