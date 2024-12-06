@@ -7,6 +7,8 @@ import numpy as np
 import random
 
 HINT_PATTERN = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
+# HINT_PATTERN = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
 population = 20 #個体数
 max_generation = 40 #最大世代数
 cr = 0.7 #交叉率
@@ -40,10 +42,10 @@ def convert_1d_to_2d(board):
 #1世代の個体数は20
 #初期解生成
 answer = np.zeros((population,81), dtype=int)
-pre_answer = np.zeros((population * 5,81), dtype=int)
+pre_answer = np.zeros((population * 7,81), dtype=int)
 
 #初期解生成（20個作成）
-for i in range(population * 5):
+for i in range(population * 7):
     pre_answer[i,:] = create.create_answer()
 
 # print("初期解")
@@ -52,8 +54,8 @@ for i in range(population * 5):
 
 #初期解の評価
 evaluation = np.zeros(population, dtype=int)
-pre_evaluation = np.zeros(population * 5, dtype=int)
-for i in range(population * 5):
+pre_evaluation = np.zeros(population * 7, dtype=int)
+for i in range(population * 7):
     pre_evaluation[i] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(pre_answer[i,:]*HINT_PATTERN))
 
 #上位population個を選択
