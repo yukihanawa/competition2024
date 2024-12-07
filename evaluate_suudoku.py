@@ -145,7 +145,7 @@ def evaluate_sudoku_2d_strict(original_board):
     if solutions == 0:
         return 10000  # 解なし
     elif solutions == 1:
-        return 1  # ユニークな解
+        return 1 + count_different_cells(sample, board) # ユニークな解
     else:
         return 100 * solutions + count_different_cells(sample, board)
 

@@ -1,4 +1,4 @@
-import create_suudoku as create
+import create_suudoku_ver1 as create
 import evaluate_suudoku
 import crossover_hint
 import solve_suudoku_2d
@@ -42,11 +42,11 @@ def convert_1d_to_2d(board):
 #1世代の個体数は20
 #初期解生成
 answer = np.zeros((population,81), dtype=int)
-pre_answer = np.zeros((population * 7,81), dtype=int)
 
 #初期解生成（20個作成）
-for i in range(population * 7):
-    pre_answer[i,:] = create.create_answer()
+for i in range(population):
+    answer[i,:] = create.create_answer()
+    answer[i,:], _ = create.repair(answer[i,:],HINT_PATTERN)
 
 # print("初期解")
 # for i in range(population):
@@ -54,23 +54,18 @@ for i in range(population * 7):
 
 #初期解の評価
 evaluation = np.zeros(population, dtype=int)
-pre_evaluation = np.zeros(population * 7, dtype=int)
-for i in range(population * 7):
-    pre_evaluation[i] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(pre_answer[i,:]*HINT_PATTERN))
+for i in range(population):
+    evaluation[i] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer[i,:]*HINT_PATTERN))
 
-#上位population個を選択
-index = np.argsort(pre_evaluation)
-index = index[0:population]
-answer = pre_answer[index,:]
-evaluation = pre_evaluation[index]
+
 
 # for i in range(population):
 #     print("evaluation[",i,"]=",evaluation[i])
 
 #評価値の低い順にソート
-# index = np.argsort(evaluation)
-# answer = answer[index,:]
-# evaluation = evaluation[index]
+index = np.argsort(evaluation)
+answer = answer[index,:]
+evaluation = evaluation[index]
 
 check_problem(answer, "初期解")
 

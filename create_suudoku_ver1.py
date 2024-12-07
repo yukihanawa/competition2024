@@ -111,6 +111,8 @@ def mutate(answer):
     if(answer is None):
         # print("1解が見つかりませんでした")
         answer = create_answer()
+        answer = repair(answer, HINT_PATTERN)
+
     else:
         # print("突然変異させる前のanswer:")
         # print(answer)
@@ -155,13 +157,15 @@ def count_solutions(sudoku, limit=1e30):
         return r
 
     cell_relationship = relation_listup()
-
+    #各セルに入れられる数字の候補をリストアップする
     insertable = [list(range(1,10)) for _ in range(81)]
+    #各セルの関連セルに入っている数字を候補から除外する
     for i in range(81):
         for cell in cell_relationship[i]:
             if sudoku[cell] in insertable[i]:
                 insertable[i].remove(sudoku[cell])
 
+    #最も候補の少ないセルを探す
     tmp_min = 10
     for i in range(81):
         if sudoku[i] == 0 and len(insertable[i]) < tmp_min:
@@ -170,12 +174,13 @@ def count_solutions(sudoku, limit=1e30):
             insert_pos = i
 
     zeros = sudoku.count(0)
-    stack = [(True, insert_pos, i,[], zeros) for i in insert_num]
+    stack = [(True, insert_pos, i,[], zeros) for i in insert_num] #初期状態として候補の少ないセルの候補を入れる
 
     cnt = 0
     tmp_solution = None
     while stack:
         pre_order, insert_pos, insert_num, restore, zeros = stack.pop()
+        #数字をセルに挿入し、盤面が完成したかどうかを確認する
         if pre_order:
             sudoku[insert_pos] = insert_num
             if zeros == 1:
@@ -184,6 +189,7 @@ def count_solutions(sudoku, limit=1e30):
                 cnt += 1
                 if cnt > limit:
                     return cnt, tmp_solution
+            #挿入した数字の影響を受けるセルの候補から挿入した数字を除外する
             for cell in cell_relationship[insert_pos]:
                 if insert_num in insertable[cell]:
                     insertable[cell].remove(insert_num)
@@ -203,9 +209,9 @@ def count_solutions(sudoku, limit=1e30):
     return cnt, tmp_solution
 
 def swap(answer, hint_pattern):
-    squared_answer = answer.reshape(9, 9)
+    # squared_answer = answer.reshape(9, 9)
     masked = answer * hint_pattern
-    num_counts = [np.sum(masked == i) for i in range(1, 10)]
+    num_counts = [np.sum(masked == i) for i in range(1, 10)] # 1~9の数字の出現回数を数える
     # 1個以上あるものからランダムに選択
     #idx = [i for i in range(9) if num_counts[i] > 0]
     #rand_num = np.random.choice(idx) + 1
@@ -220,10 +226,11 @@ def swap(answer, hint_pattern):
         for col in range(9):
             if squared[row, col] == 0:
                 continue
-            if squared[row, :].tolist().count(max_num) == 0 and squared[:, col].tolist().count(max_num) == 0:
+            if squared[row, :].tolist().count(max_num) == 0 and squared[:, col].tolist().count(max_num) == 0: # 行にも列にもmax_numを含まない
                 row_cols.append((row, col))
-    inversed = answer * (1 - np.array(hint_pattern))
+    inversed = answer * (1 - np.array(hint_pattern)) # ヒント以外のセル
     inversed_squared = inversed.reshape(9, 9)
+    # ヒント以外のセルのなかで行にも列にもmax_numを含む行と列を探す
     row_cols2 = []
     for row in range(9):
         for col in range(9):
@@ -231,7 +238,7 @@ def swap(answer, hint_pattern):
                 continue
             if inversed_squared[row, :].tolist().count(max_num) == 1 and inversed_squared[:, col].tolist().count(max_num) == 1:
                 row_cols2.append((row, col))
-    print(row_cols, row_cols2)
+    # print(row_cols, row_cols2)
     s = input()
     applied = False
     if len(row_cols) == 0:
@@ -279,7 +286,7 @@ def repair(answer, hint_pattern):
     for _ in range(10):
         masked = answer * hint_pattern
         cnt, _ = count_solutions(list(masked))
-        print(cnt)
+        # print(cnt)
         best_answer = answer.copy()
         best_masked = masked.copy()
         for _ in range(100):
@@ -295,7 +302,7 @@ def repair(answer, hint_pattern):
                     best_answer = tmp_sudoku 
                     best_masked = tmp_masked.copy()
                     cnt = new_cnt
-                    print(cnt)
+                    # print(cnt)
             masked = best_masked.copy()
             if cnt == 1:
                 break
@@ -304,24 +311,45 @@ def repair(answer, hint_pattern):
     best_answer = [int(x) for x in best_answer]
     return best_answer, cnt
 
-if __name__ == "__main__":
-    random.seed(0)
-    best_answers = []
-    for _ in range(10):
-        answer = create_answer()
-        HINT_PATTERN = np.array([1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
-        best_answer, cnt = repair(answer, HINT_PATTERN)
-        best_answers.append((best_answer, cnt))
-    for best_answer, cnt in best_answers:
-        print(best_answer, cnt)
-        for row in range(9):
-            for col in range(9):
-                print(best_answer[row*9+col], end=' ')
-            print()
-        print()
-        best_masked = best_answer * HINT_PATTERN
-        for row in range(9):
-            for col in range(9):
-                print(best_masked[row*9+col], end=' ')
-            print()
+# if __name__ == "__main__":
+#     random.seed(0)
+#     best_answers = []
+#     for _ in range(10):
+#         answer = create_answer()
+#         HINT_PATTERN = np.array([1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+#         best_answer, cnt = repair(answer, HINT_PATTERN)
+#         best_answers.append((best_answer, cnt))
+#     for best_answer, cnt in best_answers:
+#         print(best_answer, cnt)
+#         for row in range(9):
+#             for col in range(9):
+#                 print(best_answer[row*9+col], end=' ')
+#             print()
+#         print()
+#         best_masked = best_answer * HINT_PATTERN
+#         for row in range(9):
+#             for col in range(9):
+#                 print(best_masked[row*9+col], end=' ')
+#             print()
             
+
+from concurrent.futures import ThreadPoolExecutor
+
+def process_task(i, HINT_PATTERN):
+    temp_answer = create_answer()
+    repaired_answer, _ = repair(temp_answer, HINT_PATTERN)
+    return repaired_answer
+
+# 並列化する部分
+def parallel_execution(population, HINT_PATTERN):
+    answer = np.zeros((population, 81))  # answer_size は問題に応じて指定
+    with ThreadPoolExecutor() as executor:
+        results = list(executor.map(lambda i: process_task(i, HINT_PATTERN), range(population)))
+    
+    for i, result in enumerate(results):
+        answer[i, :] = result
+    return answer
+
+answer = parallel_execution(20, HINT_PATTERN)
+for i in range(20):
+    print(answer[i].reshape(9, 9))
