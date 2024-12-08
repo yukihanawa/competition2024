@@ -123,19 +123,39 @@ def crossover(parent1, parent2, parent1_eval, parent2_eval):
         # print("解の作成中...")
         child1 = solve_suudoku_2d.solve_sudoku_fast(np.array(child1).reshape(9, 9))
         if(child1 is not None):
-            child1 = np.array(child1).reshape(81) * HINT_PATTERN
+            # child1 = np.array(child1).reshape(81) * HINT_PATTERN
+            child1,_ = create.repair(child1.reshape(81), HINT_PATTERN)
+            child1 = np.array(child1) * HINT_PATTERN
         else:
             child1 = create.mutate(parent1)
         # print("解の作成完了")
+    else:
+        child1 = solve_suudoku_2d.solve_sudoku_fast(np.array(child1).reshape(9, 9))
+        if(child1 is not None):
+            # child1 = np.array(child1).reshape(81) * HINT_PATTERN
+            child1,_ = create.repair(child1.reshape(81), HINT_PATTERN)
+            child1 = np.array(child1) * HINT_PATTERN
+        else:
+            child1 = create.mutate(parent1)
 
     if check_child2 == False:
         # print("解の作成中...")
         child2 = solve_suudoku_2d.solve_sudoku_fast(np.array(child2).reshape(9, 9))
         if(child2 is not None):
-            child2 = np.array(child2).reshape(81) * HINT_PATTERN
+            # child2 = np.array(child2).reshape(81) * HINT_PATTERN
+            child2,_ = create.repair(child2.reshape(81), HINT_PATTERN)
+            child2 = np.array(child2) * HINT_PATTERN
         else:
             child2 = create.mutate(parent2)
         # print("解の作成完了")
+    else:
+        child2 = solve_suudoku_2d.solve_sudoku_fast(np.array(child2).reshape(9, 9))
+        if(child2 is not None):
+            # child2 = np.array(child2).reshape(81) * HINT_PATTERN
+            child2,_ = create.repair(child2.reshape(81), HINT_PATTERN)
+            child2 = np.array(child2) * HINT_PATTERN
+        else:
+            child2 = create.mutate(parent2)
 
     # print("child1:")
     # print(child1.reshape(9, 9))

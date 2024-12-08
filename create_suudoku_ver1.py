@@ -111,7 +111,6 @@ def mutate(answer):
     if(answer is None):
         # print("1解が見つかりませんでした")
         answer = create_answer()
-        answer = repair(answer, HINT_PATTERN)
 
     else:
         # print("突然変異させる前のanswer:")
@@ -131,7 +130,8 @@ def mutate(answer):
                 answer = change_column(answer)
         # print("突然変異させた後のanswer:")
         # print(answer)
-    answer = answer.flatten()*HINT_PATTERN
+    answer = repair(answer.flatten(), HINT_PATTERN)[0]
+    answer = np.array(answer)*HINT_PATTERN
     if(A == 1):
         if(check_problem(answer, "突然変異") == False):
             print("突然変異後のanswer:",answer)
@@ -229,7 +229,7 @@ def swap(answer, hint_pattern):
             if squared[row, :].tolist().count(max_num) == 0 and squared[:, col].tolist().count(max_num) == 0: # 行にも列にもmax_numを含まない
                 row_cols.append((row, col))
     inversed = answer * (1 - np.array(hint_pattern)) # ヒント以外のセル
-    inversed_squared = inversed.reshape(9, 9)
+    inversed_squared = inversed.reshape(9, 9) #ヒント以外の部分が見えるようになっている
     # ヒント以外のセルのなかで行にも列にもmax_numを含む行と列を探す
     row_cols2 = []
     for row in range(9):
@@ -333,23 +333,23 @@ def repair(answer, hint_pattern):
 #             print()
             
 
-from concurrent.futures import ThreadPoolExecutor
+# from concurrent.futures import ThreadPoolExecutor
 
-def process_task(i, HINT_PATTERN):
-    temp_answer = create_answer()
-    repaired_answer, _ = repair(temp_answer, HINT_PATTERN)
-    return repaired_answer
+# def process_task(i, HINT_PATTERN):
+#     temp_answer = create_answer()
+#     repaired_answer, _ = repair(temp_answer, HINT_PATTERN)
+#     return repaired_answer
 
-# 並列化する部分
-def parallel_execution(population, HINT_PATTERN):
-    answer = np.zeros((population, 81))  # answer_size は問題に応じて指定
-    with ThreadPoolExecutor() as executor:
-        results = list(executor.map(lambda i: process_task(i, HINT_PATTERN), range(population)))
+# # 並列化する部分
+# def parallel_execution(population, HINT_PATTERN):
+#     answer = np.zeros((population, 81))  # answer_size は問題に応じて指定
+#     with ThreadPoolExecutor() as executor:
+#         results = list(executor.map(lambda i: process_task(i, HINT_PATTERN), range(population)))
     
-    for i, result in enumerate(results):
-        answer[i, :] = result
-    return answer
+#     for i, result in enumerate(results):
+#         answer[i, :] = result
+#     return answer
 
-answer = parallel_execution(20, HINT_PATTERN)
-for i in range(20):
-    print(answer[i].reshape(9, 9))
+# answer = parallel_execution(20, HINT_PATTERN)
+# for i in range(20):
+#     print(answer[i].reshape(9, 9))

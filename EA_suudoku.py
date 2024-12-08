@@ -115,9 +115,10 @@ for i in range(max_generation):
     evaluation = np.hstack((evaluation_cross, evaluation_mutate, evaluation))
 
     # #すべての個体を表示
-    # print("generation[",i,"]が終わった")
-    # for j in range(population):
-    #     print(answer[j,:].reshape(9, 9))
+    print("generation[",i,"]が終わった")
+    print(evaluation)
+    # for j in range(population * 2):
+    #     print(evaluation[j])
 
 
     #評価値の低い順にソート
