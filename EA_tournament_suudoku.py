@@ -15,6 +15,7 @@ cr = 0.7 #交叉率
 cn = 2 * round(cr * population/2) #交叉数
 mr = 0.3 #突然変異率
 print("cn:",cn//2)
+tournament_size = 4
 #問題の整合性を確認
 # 問題の整合性を確認
 def check_problem(answer, a):
@@ -37,6 +38,13 @@ def check_problem(answer, a):
 #81要素のリストを9×9行列に変換
 def convert_1d_to_2d(board):
     return np.array(board).reshape(9, 9)
+
+def tournament_selection(answer, evaluation, tournament_size):
+    selected_index = []
+    for i in range(population):
+        index = np.random.choice(population, tournament_size, replace=False)
+        selected_index.append(index[np.argmin(evaluation[index])])
+    return answer[selected_index,:], evaluation[selected_index]
 
 #各個体は81要素のリストで表現される
 #1世代の個体数は20
@@ -73,17 +81,13 @@ check_problem(answer, "初期解")
 #親の評価値が最も高いものを選ぶ
 for i in range(max_generation):
     print("generation[",i,"]")
-    # #最良個体は保存
-    # best_parent = answer[0,:]
-    # best_parent_eval = evaluation[0]
-    #親をランダムに並び替え
-    index = np.random.permutation(population)
-    answer = answer[index,:]
-    evaluation = evaluation[index]
+    
+    #トーナメント選択
+    selected_answer, selected_evaluation = tournament_selection(answer, evaluation, tournament_size)
 
     #交叉させる個体
-    answer_cross = answer[0:cn,:].copy()
-    evaluation_cross = evaluation[0:cn].copy()
+    answer_cross = selected_answer[0:cn,:].copy()
+    evaluation_cross = selected_evaluation[0:cn].copy()
     answer_mutate = answer[cn:,:].copy()
     evaluation_mutate = evaluation[cn:].copy()
     # print("cossover:",i)
