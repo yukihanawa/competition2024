@@ -15,7 +15,8 @@ cr = 0.7 #交叉率
 cn = 2 * round(cr * population/2) #交叉数
 mr = 0.3 #突然変異率
 print("cn:",cn//2)
-tournament_size = 4
+tournament_size = 3
+replace_ratio = 2/3
 #問題の整合性を確認
 # 問題の整合性を確認
 def check_problem(answer, a):
@@ -81,6 +82,15 @@ check_problem(answer, "初期解")
 #親の評価値が最も高いものを選ぶ
 for i in range(max_generation):
     print("generation[",i,"]")
+
+    if np.all(evaluation == evaluation[0]):
+        print("すべて同じ評価値のため一部個体を新規作成")
+        num_replace = int(population - 2)
+        replace_indeices = np.random.choice(population, num_replace, replace=False)
+        for idx in replace_indeices:
+            answer[idx, :] = create.create_answer()
+            answer[idx,:], _ = create.repair(answer[idx,:],HINT_PATTERN)
+            evaluation[idx] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer[idx,:]*HINT_PATTERN))
     
     #トーナメント選択
     selected_answer, selected_evaluation = tournament_selection(answer, evaluation, tournament_size)
