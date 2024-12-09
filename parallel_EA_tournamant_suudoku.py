@@ -15,7 +15,7 @@ max_generation = 40 #最大世代数
 cr = 0.7 #交叉率
 cn = 2 * round(cr * population/2) #交叉数
 mr = 0.3 #突然変異率
-print("cn:",cn//2)
+# print("cn:",cn//2)
 tournament_size = 4
 replace_ratio = 2/3
 #問題の整合性を確認
@@ -54,7 +54,7 @@ def process_replace_task(idx, HINT_PATTERN):
     temp_answer = create.create_answer()
     repaired_answer, _ = create.repair(temp_answer, np.array(HINT_PATTERN))
     evaluation_score = evaluate_suudoku.evaluate_sudoku_2d_strict(
-        convert_1d_to_2d(repaired_answer * HINT_PATTERN)
+        convert_1d_to_2d(np.array(repaired_answer) * HINT_PATTERN)
     )
     return idx, repaired_answer, evaluation_score
 
@@ -77,104 +77,105 @@ def parallel_replace(replace_indices, HINT_PATTERN, answer, evaluation):
 #各個体は81要素のリストで表現される
 #1世代の個体数は20
 #初期解生成
-answer = np.zeros((population,81), dtype=int)
+if __name__ == "__main__":
+    answer = np.zeros((population,81), dtype=int)
 
-answer = create.parallel_execution(population,np.array(HINT_PATTERN))
+    answer = create.parallel_execution(population,np.array(HINT_PATTERN))
 
-# print("初期解")
-# for i in range(population):
-#     print(np.unique(answer[i,:]*HINT_PATTERN))
+    # print("初期解")
+    # for i in range(population):
+    #     print(np.unique(answer[i,:]*HINT_PATTERN))
 
-#初期解の評価
-evaluation = np.zeros(population, dtype=int)
-for i in range(population):
-    evaluation[i] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer[i,:]*HINT_PATTERN))
+    #初期解の評価
+    evaluation = np.zeros(population, dtype=int)
+    for i in range(population):
+        evaluation[i] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer[i,:]*HINT_PATTERN))
 
 
 
-# for i in range(population):
-#     print("evaluation[",i,"]=",evaluation[i])
-
-#評価値の低い順にソート
-index = np.argsort(evaluation)
-answer = answer[index,:]
-evaluation = evaluation[index]
-
-check_problem(answer, "初期解")
-
-#新たな解を作成し、その評価値が親より高い場合には置き換える
-#親の評価値が最も高いものを選ぶ
-for i in range(max_generation):
-    print("generation[",i,"]")
-
-    if np.all(evaluation == evaluation[0]):
-        print("すべて同じ評価値のため一部個体を新規作成")
-        num_replace = int(population - 2)
-        replace_indices = np.random.choice(population, num_replace, replace=False)
-        answer, evaluation = parallel_replace(replace_indices, HINT_PATTERN, answer, evaluation)
-        
-    
-    #トーナメント選択
-    selected_answer, selected_evaluation = tournament_selection(answer, evaluation, tournament_size)
-
-    #交叉させる個体
-    answer_cross = selected_answer[0:cn,:].copy()
-    evaluation_cross = selected_evaluation[0:cn].copy()
-    answer_mutate = answer[cn:,:].copy()
-    evaluation_mutate = evaluation[cn:].copy()
-    # print("cossover:",i)
-    #交叉
-    for j in range(0, cn//2):
-        answer_cross[2*j,:], answer_cross[2*j + 1,:], evaluation_cross[2*j], evaluation_cross[2*j+1] = crossover_hint.crossover(answer_cross[2*j,:], answer_cross[2*j+1,:], evaluation_cross[2*j], evaluation_cross[2*j+1])
-        for k in range(81):
-            if HINT_PATTERN[k] == 1 and answer_cross[j,k] == 0:
-                print("正しく交叉されていません")
-    
-    check_problem(answer_cross, "交叉")
-    
-    # print("mutate:",i)
-    #突然変異
-    for j in range(population - cn):
-        answer_mutate[j,:] = create.mutate(answer_mutate[j,:])
-        # print("finish mutate")
-        # print("answer_mutate[:,j]:",answer_mutate[j,:])
-        evaluation_mutate[j] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer_mutate[j,:]*HINT_PATTERN))
-        # print("finish evaluate_mutate")
-        for k in range(81):
-            if HINT_PATTERN[k] == 1 and answer_mutate[j,k] == 0:
-                print("正しく突然変異されていません")
-    # print("突然変異終了")
-    check_problem(answer_mutate, "突然変異")
-
-    #交叉と突然変異で生成した個体を結合 + 親
-    answer = np.vstack((answer_cross, answer_mutate, answer))
-    evaluation = np.hstack((evaluation_cross, evaluation_mutate, evaluation))
-
-    # #すべての個体を表示
-    # print("generation[",i,"]が終わった")
-    print(evaluation)
-    # for j in range(population * 2):
-    #     print(evaluation[j])
-
+    # for i in range(population):
+    #     print("evaluation[",i,"]=",evaluation[i])
 
     #評価値の低い順にソート
     index = np.argsort(evaluation)
-    index = index[0:population]
-    # print("index:",index)
     answer = answer[index,:]
     evaluation = evaluation[index]
 
+    check_problem(answer, "初期解")
 
-    
-    print("best_parent_eval[",i,"]=",evaluation[0])
-    print("list of evaluation:")
-    print(evaluation)
+    #新たな解を作成し、その評価値が親より高い場合には置き換える
+    #親の評価値が最も高いものを選ぶ
+    for i in range(max_generation):
+        print("generation[",i,"]")
+
+        if np.all(evaluation == evaluation[0]):
+            print("すべて同じ評価値のため一部個体を新規作成")
+            num_replace = int(population - 2)
+            replace_indices = np.random.choice(population, num_replace, replace=False)
+            answer, evaluation = parallel_replace(replace_indices, HINT_PATTERN, answer, evaluation)
+            
+        
+        #トーナメント選択
+        selected_answer, selected_evaluation = tournament_selection(answer, evaluation, tournament_size)
+
+        #交叉させる個体
+        answer_cross = selected_answer[0:cn,:].copy()
+        evaluation_cross = selected_evaluation[0:cn].copy()
+        answer_mutate = answer[cn:,:].copy()
+        evaluation_mutate = evaluation[cn:].copy()
+        # print("cossover:",i)
+        #交叉
+        for j in range(0, cn//2):
+            answer_cross[2*j,:], answer_cross[2*j + 1,:], evaluation_cross[2*j], evaluation_cross[2*j+1] = crossover_hint.crossover(answer_cross[2*j,:], answer_cross[2*j+1,:], evaluation_cross[2*j], evaluation_cross[2*j+1])
+            for k in range(81):
+                if HINT_PATTERN[k] == 1 and answer_cross[j,k] == 0:
+                    print("正しく交叉されていません")
+        
+        check_problem(answer_cross, "交叉")
+        
+        # print("mutate:",i)
+        #突然変異
+        for j in range(population - cn):
+            answer_mutate[j,:] = create.mutate(answer_mutate[j,:])
+            # print("finish mutate")
+            # print("answer_mutate[:,j]:",answer_mutate[j,:])
+            evaluation_mutate[j] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer_mutate[j,:]*HINT_PATTERN))
+            # print("finish evaluate_mutate")
+            for k in range(81):
+                if HINT_PATTERN[k] == 1 and answer_mutate[j,k] == 0:
+                    print("正しく突然変異されていません")
+        # print("突然変異終了")
+        check_problem(answer_mutate, "突然変異")
+
+        #交叉と突然変異で生成した個体を結合 + 親
+        answer = np.vstack((answer_cross, answer_mutate, answer))
+        evaluation = np.hstack((evaluation_cross, evaluation_mutate, evaluation))
+
+        # #すべての個体を表示
+        # print("generation[",i,"]が終わった")
+        print(evaluation)
+        # for j in range(population * 2):
+        #     print(evaluation[j])
+
+
+        #評価値の低い順にソート
+        index = np.argsort(evaluation)
+        index = index[0:population]
+        # print("index:",index)
+        answer = answer[index,:]
+        evaluation = evaluation[index]
+
+
+        
+        print("best_parent_eval[",i,"]=",evaluation[0])
+        print("list of evaluation:")
+        print(evaluation)
 
 
 
-#最も評価値が高い解を出力
-print(answer[0,:].reshape(9, 9))
-print(evaluation[0])
+    #最も評価値が高い解を出力
+    print(answer[0,:].reshape(9, 9))
+    print(evaluation[0])
 # print("評価値が最も高い解")
 # print((np.array(answer[0,:] * HINT_PATTERN)).reshape(9, 9))
 # a = find_all.solve_sudoku(convert_1d_to_2d(answer[0,:] * HINT_PATTERN))
