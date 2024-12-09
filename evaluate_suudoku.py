@@ -138,16 +138,25 @@ def count_different_cells(original, solved):
                 diff_count += 1
     return diff_count
 
+#マンハッタン距離
+def manhattan_distance(original,solved):
+    distance = 0
+    for row in range(9):
+        for col in range(9):
+            distance += abs(original[row][col] - solved[row][col])
+    return distance
+
 def evaluate_sudoku_2d_strict(original_board):
     board = [row[:] for row in original_board]
-    solutions = solve_and_track_depth(board)
+    # solutions = solve_and_track_depth(board)
     
-    if solutions == 0:
-        return 10000  # 解なし
-    elif solutions == 1:
-        return 1 + count_different_cells(sample, board) # ユニークな解
-    else:
-        return 100 * solutions + count_different_cells(sample, board)
+    # if solutions == 0:
+    #     return 10000  # 解なし
+    # elif solutions == 1:
+    #     return 1 + count_different_cells(sample, board) # ユニークな解
+    # else:
+    #     return 100 * solutions + count_different_cells(sample, board)
+    return manhattan_distance(sample, board) + 1000 * (solve_and_track_depth(board) - 1)
 
 
 # problem_2d = [
