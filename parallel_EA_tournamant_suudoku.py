@@ -1,10 +1,11 @@
-import create_suudoku_ver1 as create
+import parallel_create_suudou_ver1 as create
 import evaluate_suudoku
 import crossover_hint
 import solve_suudoku_2d
 import _find_all
 import numpy as np
 import random
+from concurrent.futures import ThreadPoolExecutor
 
 HINT_PATTERN = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
 # HINT_PATTERN = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -47,15 +48,38 @@ def tournament_selection(answer, evaluation, tournament_size):
         selected_index.append(index[np.argmin(evaluation[index])])
     return answer[selected_index,:], evaluation[selected_index]
 
+# 並列化するタスクの定義
+def process_replace_task(idx, HINT_PATTERN):
+    # 個別のインデックスに対する処理
+    temp_answer = create.create_answer()
+    repaired_answer, _ = create.repair(temp_answer, np.array(HINT_PATTERN))
+    evaluation_score = evaluate_suudoku.evaluate_sudoku_2d_strict(
+        convert_1d_to_2d(repaired_answer * HINT_PATTERN)
+    )
+    return idx, repaired_answer, evaluation_score
+
+# 並列化のメイン部分
+def parallel_replace(replace_indices, HINT_PATTERN, answer, evaluation):
+    with ThreadPoolExecutor() as executor:
+        # タスクを並列実行
+        futures = [
+            executor.submit(process_replace_task, idx, HINT_PATTERN)
+            for idx in replace_indices
+        ]
+        # 結果を収集
+        for future in futures:
+            idx, repaired_answer, evaluation_score = future.result()
+            # 結果を answer と evaluation に書き込み
+            answer[idx, :] = repaired_answer
+            evaluation[idx] = evaluation_score
+    return answer, evaluation
+
 #各個体は81要素のリストで表現される
 #1世代の個体数は20
 #初期解生成
 answer = np.zeros((population,81), dtype=int)
 
-#初期解生成（20個作成）
-for i in range(population):
-    answer[i,:] = create.create_answer()
-    answer[i,:], _ = create.repair(answer[i,:],HINT_PATTERN)
+answer = create.parallel_execution(population,np.array(HINT_PATTERN))
 
 # print("初期解")
 # for i in range(population):
@@ -86,11 +110,9 @@ for i in range(max_generation):
     if np.all(evaluation == evaluation[0]):
         print("すべて同じ評価値のため一部個体を新規作成")
         num_replace = int(population - 2)
-        replace_indeices = np.random.choice(population, num_replace, replace=False)
-        for idx in replace_indeices:
-            answer[idx, :] = create.create_answer()
-            answer[idx,:], _ = create.repair(answer[idx,:],HINT_PATTERN)
-            evaluation[idx] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer[idx,:]*HINT_PATTERN))
+        replace_indices = np.random.choice(population, num_replace, replace=False)
+        answer, evaluation = parallel_replace(replace_indices, HINT_PATTERN, answer, evaluation)
+        
     
     #トーナメント選択
     selected_answer, selected_evaluation = tournament_selection(answer, evaluation, tournament_size)
