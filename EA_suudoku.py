@@ -1,4 +1,4 @@
-import create_suudoku_ver1 as create
+import parallel_create_suudou_ver1 as create
 import evaluate_suudoku
 import crossover_hint
 import solve_suudoku_2d

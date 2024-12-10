@@ -333,27 +333,23 @@ def repair(answer, hint_pattern):
 #             print()
             
 
-from concurrent.futures import ProcessPoolExecutor
-import numpy as np
+# from concurrent.futures import ThreadPoolExecutor
 
-def process_task(i, HINT_PATTERN):
-    temp_answer = create_answer()
-    repaired_answer, _ = repair(temp_answer, HINT_PATTERN)
-    return repaired_answer
+# def process_task(i, HINT_PATTERN):
+#     temp_answer = create_answer()
+#     repaired_answer, _ = repair(temp_answer, HINT_PATTERN)
+#     return repaired_answer
 
-# 並列化する部分
-def parallel_execution(population, HINT_PATTERN):
-    answer = np.zeros((population, 81))  # answer_size は問題に応じて指定
-    with ProcessPoolExecutor() as executor:
-        results = list(executor.map(process_task, range(population), [HINT_PATTERN] * population))
+# # 並列化する部分
+# def parallel_execution(population, HINT_PATTERN):
+#     answer = np.zeros((population, 81))  # answer_size は問題に応じて指定
+#     with ThreadPoolExecutor() as executor:
+#         results = list(executor.map(lambda i: process_task(i, HINT_PATTERN), range(population)))
     
-    for i, result in enumerate(results):
-        answer[i, :] = result
-    return answer
+#     for i, result in enumerate(results):
+#         answer[i, :] = result
+#     return answer
 
-if __name__ == '__main__':
-    # メイン処理
-    HINT_PATTERN = np.array([1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
-    answer = parallel_execution(20, HINT_PATTERN)
-    for i in range(20):
-        print(answer[i].reshape(9, 9))
+# answer = parallel_execution(20, HINT_PATTERN)
+# for i in range(20):
+#     print(answer[i].reshape(9, 9))

@@ -1,4 +1,5 @@
 import solve_suudoku_2d
+from opthub_client.api import OptHub
 
 # def evaluate_sudoku_2d_strict(board):
 #     """
@@ -147,6 +148,7 @@ def manhattan_distance(original,solved):
     return distance
 
 def evaluate_sudoku_2d_strict(original_board):
+    print("board:", original_board)
     board = [row[:] for row in original_board]
     # solutions = solve_and_track_depth(board)
     
@@ -157,6 +159,12 @@ def evaluate_sudoku_2d_strict(original_board):
     # else:
     #     return 100 * solutions + count_different_cells(sample, board)
     return manhattan_distance(sample, board) + 1000 * (solve_and_track_depth(board) - 1)
+
+# def evaluate_opthub(board):
+#     with OptHub("ohxmuBTKjB6wzMYVSvliy5WSJIU0Efw66wHBkpOc") as api:
+# 	    opthub_match = api.match("726c509c-4831-47bc-8d8a-d79b52f2cedf")
+#         trial = opthub_match.submit(board)
+    
 
 
 # problem_2d = [
