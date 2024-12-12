@@ -142,27 +142,27 @@ def count_different_cells(original, solved):
     return diff_count
 
 #マンハッタン距離
-def manhattan_distance(original,solved):
-    distance = 0
-    for row in range(9):
-        for col in range(9):
-            distance += abs(original[row][col] - solved[row][col])
-    return distance
+# def manhattan_distance(original,solved):
+#     distance = 0
+#     for row in range(9):
+#         for col in range(9):
+#             distance += abs(original[row][col] - solved[row][col])
+#     return distance
 
-def evaluate_sudoku_2d_strict(original_board):
-    # print("board:", np.array(original_board, dtype = int).flatten())
-    board = [row[:] for row in original_board]
-    # solutions = solve_and_track_depth(board)
+# def evaluate_sudoku_2d_strict(original_board):
+#     # print("board:", np.array(original_board, dtype = int).flatten())
+#     board = [row[:] for row in original_board]
+#     # solutions = solve_and_track_depth(board)
     
-    # if solutions == 0:
-    #     return 10000  # 解なし
-    # elif solutions == 1:
-    #     return 1 + count_different_cells(sample, board) # ユニークな解
-    # else:
-    #     return 100 * solutions + count_different_cells(sample, board)
-    return manhattan_distance(sample, board) + 1000 * (solve_and_track_depth(board) - 1)
+#     # if solutions == 0:
+#     #     return 10000  # 解なし
+#     # elif solutions == 1:
+#     #     return 1 + count_different_cells(sample, board) # ユニークな解
+#     # else:
+#     #     return 100 * solutions + count_different_cells(sample, board)
+#     return manhattan_distance(sample, board) + 1000 * (solve_and_track_depth(board) - 1)
 
-def evaluate_opthub(board):
+def evaluate_sudoku_2d_strict(board):
     with OptHub("ohxmuBTKjB6wzMYVSvliy5WSJIU0Efw66wHBkpOc") as api:
         opthub_match = api.match("726c509c-4831-47bc-8d8a-d79b52f2cedf")
         trial = opthub_match.submit(np.array(board, dtype = int).flatten())
