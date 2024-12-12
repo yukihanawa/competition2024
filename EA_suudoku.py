@@ -5,7 +5,7 @@ import solve_suudoku_2d
 import _find_all
 import numpy as np
 import random
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 
 HINT_PATTERN = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
 # HINT_PATTERN = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -39,13 +39,15 @@ def check_problem(answer, a):
 def convert_1d_to_2d(board):
     return np.array(board).reshape(9, 9)
 
-def eval_pop_in_parallel(answer):
-    def parallel_evaluation(i):
-        return evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer[i, :] * HINT_PATTERN))
+def parallel_evaluation(args):
+        i, answer, hint_pattern = args
+        return evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer[i, :] * hint_pattern))
 
+def eval_pop_in_parallel(answer,hint_pattern):
     evaluation_ = np.zeros(population)  # 結果を格納する配列
-    with ThreadPoolExecutor() as executor:
-        results = list(executor.map(parallel_evaluation, range(population)))
+    with ProcessPoolExecutor() as executor:
+        args = [(i, answer, hint_pattern)for i in range(population)]
+        results = list(executor.map(parallel_evaluation, args))
     evaluation_[:] = results
     return evaluation_
 
@@ -65,7 +67,7 @@ def crossover_population_in_parallel(cn, answer_cross, evaluation_cross, hint_pa
         return (2 * j, child1, child2, eval1, eval2)
 
     # 並列実行
-    with ThreadPoolExecutor() as executor:
+    with ProcessPoolExecutor() as executor:
         results = list(executor.map(parallel_crossover, range(cn // 2)))
 
     # 結果を反映
@@ -77,11 +79,11 @@ def crossover_population_in_parallel(cn, answer_cross, evaluation_cross, hint_pa
 
     return answer_cross, evaluation_cross
 
-def mutate_population_in_parallel(population, cn, answer_mutate, evaluation_mutate):
+def mutate_population_in_parallel(population, cn, answer_mutate, evaluation_mutate,hint_pattern):
     def parallel_mutation(j):
         # 突然変異を実行
         mutated = create.mutate(answer_mutate[j, :])
-        _evaluation = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(mutated * HINT_PATTERN))
+        _evaluation = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(mutated * hint_pattern))
         
         # 突然変異結果を検証
         for k in range(81):
@@ -90,7 +92,7 @@ def mutate_population_in_parallel(population, cn, answer_mutate, evaluation_muta
         return j, mutated, _evaluation
 
     # 並列実行
-    with ThreadPoolExecutor() as executor:
+    with ProcessPoolExecutor() as executor:
         results = list(executor.map(parallel_mutation, range(population - cn)))
 
     # 結果を反映
@@ -121,7 +123,7 @@ if __name__ == "__main__":
     evaluation = np.zeros(population, dtype=float)
     # for i in range(population):
     #     evaluation[i] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer[i,:]*HINT_PATTERN))
-    evaluation = eval_pop_in_parallel(answer)
+    evaluation = eval_pop_in_parallel(answer,HINT_PATTERN)
 
 
 
@@ -159,6 +161,7 @@ if __name__ == "__main__":
         #     for k in range(81):
         #         if HINT_PATTERN[k] == 1 and answer_cross[j,k] == 0:
         #             print("正しく交叉されていません")
+        print("crossover")
         answer_cross, evaluation_cross = crossover_population_in_parallel(cn, answer_cross, evaluation_cross, HINT_PATTERN)
 
         check_problem(answer_cross, "交叉")
@@ -174,7 +177,8 @@ if __name__ == "__main__":
         #     for k in range(81):
         #         if HINT_PATTERN[k] == 1 and answer_mutate[j,k] == 0:
         #             print("正しく突然変異されていません")
-        answer_mutate, evaluation_mutate = mutate_population_in_parallel(population, cn, answer_mutate, evaluation_mutate)
+        print("mutate")
+        answer_mutate, evaluation_mutate = mutate_population_in_parallel(population, cn, answer_mutate, evaluation_mutate,HINT_PATTERN)
         # print("突然変異終了")
         check_problem(answer_mutate, "突然変異")
 
