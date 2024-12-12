@@ -5,6 +5,7 @@ import solve_suudoku_2d
 import _find_all
 import numpy as np
 import random
+from concurrent.futures import ThreadPoolExecutor
 
 HINT_PATTERN = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
 # HINT_PATTERN = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -38,6 +39,67 @@ def check_problem(answer, a):
 def convert_1d_to_2d(board):
     return np.array(board).reshape(9, 9)
 
+def eval_pop_in_parallel(answer):
+    def parallel_evaluation(i):
+        return evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer[i, :] * HINT_PATTERN))
+
+    evaluation_ = np.zeros(population)  # 結果を格納する配列
+    with ThreadPoolExecutor() as executor:
+        results = list(executor.map(parallel_evaluation, range(population)))
+    evaluation_[:] = results
+    return evaluation_
+
+def crossover_population_in_parallel(cn, answer_cross, evaluation_cross, hint_pattern):
+    def parallel_crossover(j):
+        # 2つの親を取得して交叉を実行
+        child1, child2, eval1, eval2 = crossover_hint.crossover(
+            answer_cross[2 * j, :],
+            answer_cross[2 * j + 1, :],
+            evaluation_cross[2 * j],
+            evaluation_cross[2 * j + 1],
+        )
+        # 交叉結果を検証
+        for k in range(81):
+            if hint_pattern[k] == 1 and (child1[k] == 0 or child2[k] == 0):
+                print(f"正しく交叉されていません: ペア {j}, インデックス {k}")
+        return (2 * j, child1, child2, eval1, eval2)
+
+    # 並列実行
+    with ThreadPoolExecutor() as executor:
+        results = list(executor.map(parallel_crossover, range(cn // 2)))
+
+    # 結果を反映
+    for idx, child1, child2, eval1, eval2 in results:
+        answer_cross[idx, :] = child1
+        answer_cross[idx + 1, :] = child2
+        evaluation_cross[idx] = eval1
+        evaluation_cross[idx + 1] = eval2
+
+    return answer_cross, evaluation_cross
+
+def mutate_population_in_parallel(population, cn, answer_mutate, evaluation_mutate):
+    def parallel_mutation(j):
+        # 突然変異を実行
+        mutated = create.mutate(answer_mutate[j, :])
+        _evaluation = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(mutated * HINT_PATTERN))
+        
+        # 突然変異結果を検証
+        for k in range(81):
+            if HINT_PATTERN[k] == 1 and mutated[k] == 0:
+                print(f"正しく突然変異されていません: 個体 {j}, インデックス {k}")
+        return j, mutated, _evaluation
+
+    # 並列実行
+    with ThreadPoolExecutor() as executor:
+        results = list(executor.map(parallel_mutation, range(population - cn)))
+
+    # 結果を反映
+    for idx, mutated, _evaluation in results:
+        answer_mutate[idx, :] = mutated
+        evaluation_mutate[idx] = _evaluation
+
+    return answer_mutate, evaluation_mutate
+
 #各個体は81要素のリストで表現される
 #1世代の個体数は20
 
@@ -57,8 +119,9 @@ if __name__ == "__main__":
 
     #初期解の評価
     evaluation = np.zeros(population, dtype=float)
-    for i in range(population):
-        evaluation[i] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer[i,:]*HINT_PATTERN))
+    # for i in range(population):
+    #     evaluation[i] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer[i,:]*HINT_PATTERN))
+    evaluation = eval_pop_in_parallel(answer)
 
 
 
@@ -91,25 +154,27 @@ if __name__ == "__main__":
         evaluation_mutate = evaluation[cn:].copy()
         # print("cossover:",i)
         #交叉
-        for j in range(0, cn//2):
-            answer_cross[2*j,:], answer_cross[2*j + 1,:], evaluation_cross[2*j], evaluation_cross[2*j+1] = crossover_hint.crossover(answer_cross[2*j,:], answer_cross[2*j+1,:], evaluation_cross[2*j], evaluation_cross[2*j+1])
-            for k in range(81):
-                if HINT_PATTERN[k] == 1 and answer_cross[j,k] == 0:
-                    print("正しく交叉されていません")
-        
+        # for j in range(0, cn//2):
+        #     answer_cross[2*j,:], answer_cross[2*j + 1,:], evaluation_cross[2*j], evaluation_cross[2*j+1] = crossover_hint.crossover(answer_cross[2*j,:], answer_cross[2*j+1,:], evaluation_cross[2*j], evaluation_cross[2*j+1])
+        #     for k in range(81):
+        #         if HINT_PATTERN[k] == 1 and answer_cross[j,k] == 0:
+        #             print("正しく交叉されていません")
+        answer_cross, evaluation_cross = crossover_population_in_parallel(cn, answer_cross, evaluation_cross, HINT_PATTERN)
+
         check_problem(answer_cross, "交叉")
-        
+
         # print("mutate:",i)
         #突然変異
-        for j in range(population - cn):
-            answer_mutate[j,:] = create.mutate(answer_mutate[j,:])
-            # print("finish mutate")
-            # print("answer_mutate[:,j]:",answer_mutate[j,:])
-            evaluation_mutate[j] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer_mutate[j,:]*HINT_PATTERN))
-            # print("finish evaluate_mutate")
-            for k in range(81):
-                if HINT_PATTERN[k] == 1 and answer_mutate[j,k] == 0:
-                    print("正しく突然変異されていません")
+        # for j in range(population - cn):
+        #     answer_mutate[j,:] = create.mutate(answer_mutate[j,:])
+        #     # print("finish mutate")
+        #     # print("answer_mutate[:,j]:",answer_mutate[j,:])
+        #     evaluation_mutate[j] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer_mutate[j,:]*HINT_PATTERN))
+        #     # print("finish evaluate_mutate")
+        #     for k in range(81):
+        #         if HINT_PATTERN[k] == 1 and answer_mutate[j,k] == 0:
+        #             print("正しく突然変異されていません")
+        answer_mutate, evaluation_mutate = mutate_population_in_parallel(population, cn, answer_mutate, evaluation_mutate)
         # print("突然変異終了")
         check_problem(answer_mutate, "突然変異")
 
