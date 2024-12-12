@@ -163,8 +163,8 @@ def count_different_cells(original, solved):
 #     return manhattan_distance(sample, board) + 1000 * (solve_and_track_depth(board) - 1)
 
 def evaluate_sudoku_2d_strict(board):
-    with OptHub("ohxmuBTKjB6wzMYVSvliy5WSJIU0Efw66wHBkpOc") as api:
-        opthub_match = api.match("726c509c-4831-47bc-8d8a-d79b52f2cedf")
+    with OptHub("1tnOxHdTiQaYAXavDfBVW3apEznx1T5X4GhwyVr8") as api:
+        opthub_match = api.match("47e507bd-eed3-4d37-9def-a1165f45b850")
         for i in range(10):
             trial = opthub_match.submit(np.array(board, dtype = int).flatten())
             eval = trial.wait_evaluation()
