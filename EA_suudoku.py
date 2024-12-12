@@ -56,7 +56,7 @@ if __name__ == "__main__":
     #     print(np.unique(answer[i,:]*HINT_PATTERN))
 
     #初期解の評価
-    evaluation = np.zeros(population, dtype=int)
+    evaluation = np.zeros(population, dtype=float)
     for i in range(population):
         evaluation[i] = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(answer[i,:]*HINT_PATTERN))
 

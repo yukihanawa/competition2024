@@ -1,6 +1,7 @@
 import solve_suudoku_2d
 import numpy as np
-# from opthub_client.api import OptHub
+from opthub_client.api import OptHub
+import json
 
 # def evaluate_sudoku_2d_strict(board):
 #     """
@@ -161,13 +162,24 @@ def evaluate_sudoku_2d_strict(original_board):
     #     return 100 * solutions + count_different_cells(sample, board)
     return manhattan_distance(sample, board) + 1000 * (solve_and_track_depth(board) - 1)
 
-# def evaluate_opthub(board):
-#     with OptHub("ohxmuBTKjB6wzMYVSvliy5WSJIU0Efw66wHBkpOc") as api:
-# 	    opthub_match = api.match("726c509c-4831-47bc-8d8a-d79b52f2cedf")
-#       trial = opthub_match.submit(np.array(board, dtype = int).flatten())
-    #     score = trial.wait_scoring()
-    # return score
+def evaluate_opthub(board):
+    with OptHub("ohxmuBTKjB6wzMYVSvliy5WSJIU0Efw66wHBkpOc") as api:
+        opthub_match = api.match("726c509c-4831-47bc-8d8a-d79b52f2cedf")
+        trial = opthub_match.submit(np.array(board, dtype = int).flatten())
+
+        eval = trial.wait_evaluation()
+        if(eval.error == None):
+            if(eval.feasible):
+                evaluation = eval.ojective.scalar
+            else:
+                evaluation = 10
+        else:
+            print("error")
+            evaluation = 10
+
+    return evaluation
     
+# evaluate_opthub(sample)
 
 
 # problem_2d = [
