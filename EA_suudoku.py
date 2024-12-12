@@ -51,24 +51,30 @@ def eval_pop_in_parallel(answer,hint_pattern):
     evaluation_[:] = results
     return evaluation_
 
-def crossover_population_in_parallel(cn, answer_cross, evaluation_cross, hint_pattern):
-    def parallel_crossover(j):
-        # 2つの親を取得して交叉を実行
-        child1, child2, eval1, eval2 = crossover_hint.crossover(
-            answer_cross[2 * j, :],
-            answer_cross[2 * j + 1, :],
-            evaluation_cross[2 * j],
-            evaluation_cross[2 * j + 1],
-        )
-        # 交叉結果を検証
-        for k in range(81):
-            if hint_pattern[k] == 1 and (child1[k] == 0 or child2[k] == 0):
-                print(f"正しく交叉されていません: ペア {j}, インデックス {k}")
-        return (2 * j, child1, child2, eval1, eval2)
+def parallel_crossover(args):
+    j, answer_cross, evaluation_cross, hint_pattern = args
+    # 2つの親を取得して交叉を実行
+    child1, child2, eval1, eval2 = crossover_hint.crossover(
+        answer_cross[2 * j, :],
+        answer_cross[2 * j + 1, :],
+        evaluation_cross[2 * j],
+        evaluation_cross[2 * j + 1],
+    )
+    # 交叉結果を検証
+    for k in range(81):
+        if hint_pattern[k] == 1 and (child1[k] == 0 or child2[k] == 0):
+            print(f"正しく交叉されていません: ペア {j}, インデックス {k}")
+    return (2 * j, child1, child2, eval1, eval2)
 
+# 並列実行する関数
+def crossover_population_in_parallel(cn, answer_cross, evaluation_cross, hint_pattern):
     # 並列実行
     with ProcessPoolExecutor() as executor:
-        results = list(executor.map(parallel_crossover, range(cn // 2)))
+        # 各タスクに必要な引数をまとめて渡す
+        args = [
+            (j, answer_cross, evaluation_cross, hint_pattern) for j in range(cn // 2)
+        ]
+        results = list(executor.map(parallel_crossover, args))
 
     # 結果を反映
     for idx, child1, child2, eval1, eval2 in results:
@@ -79,21 +85,30 @@ def crossover_population_in_parallel(cn, answer_cross, evaluation_cross, hint_pa
 
     return answer_cross, evaluation_cross
 
-def mutate_population_in_parallel(population, cn, answer_mutate, evaluation_mutate,hint_pattern):
-    def parallel_mutation(j):
-        # 突然変異を実行
-        mutated = create.mutate(answer_mutate[j, :])
-        _evaluation = evaluate_suudoku.evaluate_sudoku_2d_strict(convert_1d_to_2d(mutated * hint_pattern))
-        
-        # 突然変異結果を検証
-        for k in range(81):
-            if HINT_PATTERN[k] == 1 and mutated[k] == 0:
-                print(f"正しく突然変異されていません: 個体 {j}, インデックス {k}")
-        return j, mutated, _evaluation
+# グローバル関数として定義
+def parallel_mutation(args):
+    j, answer_mutate, hint_pattern = args
+    # 突然変異を実行
+    mutated = create.mutate(answer_mutate[j, :])
+    _evaluation = evaluate_suudoku.evaluate_sudoku_2d_strict(
+        convert_1d_to_2d(mutated * hint_pattern)
+    )
 
+    # 突然変異結果を検証
+    for k in range(81):
+        if hint_pattern[k] == 1 and mutated[k] == 0:
+            print(f"正しく突然変異されていません: 個体 {j}, インデックス {k}")
+    return j, mutated, _evaluation
+
+# 並列実行する関数
+def mutate_population_in_parallel(population, cn, answer_mutate, evaluation_mutate, hint_pattern):
     # 並列実行
     with ProcessPoolExecutor() as executor:
-        results = list(executor.map(parallel_mutation, range(population - cn)))
+        # 各タスクに必要な引数をまとめて渡す
+        args = [
+            (j, answer_mutate, hint_pattern) for j in range(population - cn)
+        ]
+        results = list(executor.map(parallel_mutation, args))
 
     # 結果を反映
     for idx, mutated, _evaluation in results:
