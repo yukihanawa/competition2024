@@ -7,8 +7,8 @@ import numpy as np
 import random
 from concurrent.futures import ProcessPoolExecutor
 
-HINT_PATTERN = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
-# HINT_PATTERN = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+# HINT_PATTERN = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
+HINT_PATTERN = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 population = 20 #個体数
 max_generation = 50 #最大世代数
@@ -117,6 +117,33 @@ def mutate_population_in_parallel(population, cn, answer_mutate, evaluation_muta
 
     return answer_mutate, evaluation_mutate
 
+
+# 並列化するタスクの定義
+def process_replace_task(idx, HINT_PATTERN):
+    # 個別のインデックスに対する処理
+    temp_answer = create.create_answer()
+    repaired_answer, _ = create.repair(temp_answer, np.array(HINT_PATTERN))
+    evaluation_score = evaluate_suudoku.evaluate_sudoku_2d_strict(
+        convert_1d_to_2d(np.array(repaired_answer) * HINT_PATTERN)
+    )
+    return idx, repaired_answer, evaluation_score
+
+# 並列化のメイン部分
+def parallel_replace(replace_indices, HINT_PATTERN, answer, evaluation):
+    with ProcessPoolExecutor() as executor:
+        # タスクを並列実行
+        futures = [
+            executor.submit(process_replace_task, idx, HINT_PATTERN)
+            for idx in replace_indices
+        ]
+        # 結果を収集
+        for future in futures:
+            idx, repaired_answer, evaluation_score = future.result()
+            # 結果を answer と evaluation に書き込み
+            answer[idx, :] = repaired_answer
+            evaluation[idx] = evaluation_score
+    return answer, evaluation
+
 #各個体は81要素のリストで表現される
 #1世代の個体数は20
 
@@ -156,6 +183,11 @@ if __name__ == "__main__":
     #親の評価値が最も高いものを選ぶ
     for i in range(max_generation):
         print("generation[",i,"]")
+        if np.all(evaluation == evaluation[0]):
+            print("すべて同じ評価値のため一部個体を新規作成")
+            num_replace = int(population - 2)
+            replace_indices = np.random.choice(population, num_replace, replace=False)
+            answer, evaluation = parallel_replace(replace_indices, HINT_PATTERN, answer, evaluation)
         # #最良個体は保存
         # best_parent = answer[0,:]
         # best_parent_eval = evaluation[0]
