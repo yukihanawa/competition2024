@@ -117,7 +117,10 @@ def mutate_population_in_parallel(population, cn, answer_mutate, evaluation_muta
 
     return answer_mutate, evaluation_mutate
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8cbc80f53dc9e55582c03a439fb1bcefa5951a8c
 # 並列化するタスクの定義
 def process_replace_task(idx, HINT_PATTERN):
     # 個別のインデックスに対する処理

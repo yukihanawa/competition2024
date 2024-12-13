@@ -164,7 +164,11 @@ def count_different_cells(original, solved):
 
 def evaluate_sudoku_2d_strict(board):
     with OptHub("1tnOxHdTiQaYAXavDfBVW3apEznx1T5X4GhwyVr8") as api:
+<<<<<<< HEAD
         opthub_match = api.match("db5b12b6-42c2-42ce-b6e6-d9a4e4cf4fd3")
+=======
+        opthub_match = api.match("47e507bd-eed3-4d37-9def-a1165f45b850")
+>>>>>>> 8cbc80f53dc9e55582c03a439fb1bcefa5951a8c
         for i in range(10):
             trial = opthub_match.submit(np.array(board, dtype = int).flatten())
             eval = trial.wait_evaluation()
